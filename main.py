@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 15:20:41>
+# last-update-time: <halida 11/08/2009 16:19:22>
 # ---------------------------------
 # 
 
@@ -29,7 +29,6 @@ class MessageViewer(QListWidget):
 class M(QMainWindow):
     def init(self):
         self.game = game.Game()
-        self.game.loadMap(test_map1)
         self.game.loadModule(test_module1)
         self.gv = game_viewer.GameViewer(self.game)
         self.mv = MessageViewer(self.game)

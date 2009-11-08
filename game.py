@@ -2,17 +2,18 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 15:07:34>
+# last-update-time: <halida 11/08/2009 16:50:02>
 # ---------------------------------
 # 
 
 from qtlib import *
 import sprite,pc
 
-PC_NOP,PC_MOVE,PC_SEARCH = range(3)
+(PC_NOP,PC_MOVE,PC_SEARCH,PC_DOWNSTAIR,PC_UPSTAIR) = range(5)
 
 #events
 PCMOVED = 'pcMoved()'
+MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
 ONINVCHANGE = 'onInvChange()'
 
@@ -23,16 +24,13 @@ class Game(QObject):
         self.sprites = []
         self.items = []
         self.pc = pc.PC()
+        self.sprites.append(self.pc)
         self.pcCmd = None
         self.pcinv = []
 
-    def loadMap(self,map):
-        self.map = map.map.split('\n')
-        self.pc.setPos(*map.pc_pos)
-        self.sprites.append(self.pc)
-
     def loadModule(self,module):
         module.setGame(self)
+        self.map = self.levels[self.currentLevel]
 
     def step(self):
         #split cmd
@@ -48,8 +46,35 @@ class Game(QObject):
 
         elif cmd == PC_SEARCH:
             self.msg('Searching...')            
+            
+        elif cmd == PC_DOWNSTAIR:
+            if self.map[self.pc.py][self.pc.px] != '<':
+                print self.map[self.pc.px][self.pc.px],self.pc.getPos()
+                self.msg('there is no downstair here.')
+            else:
+                self.updateMap(-1)
+        elif cmd == PC_UPSTAIR:
+            if self.map[self.pc.py][self.pc.px] != '>':
+                self.msg('there is no upstair here.')
+            else:
+                self.updateMap(1)
+
         else:
             raise Exception("this cmd not defined:",self.pcCmd)
+
+    def updateMap(self,maplevel):
+        self.currentLevel += maplevel
+        self.map = self.levels[self.currentLevel]
+        for y,row in enumerate(self.map):
+            for x,floor in enumerate(row):
+                if maplevel > 0 and floor == '<':
+                    newloc = x,y
+                if maplevel < 0 and floor == '>':
+                    newloc = x,y
+        self.pc.setPos(*newloc)
+        emit(self,MAPCHANGED)
+        emit(self,PCMOVED)
+        print "map changed to level:",self.currentLevel
 
     def msg(self,m):
         emit(self,ONMESSAGE,m)
@@ -70,8 +95,16 @@ class Game(QObject):
             self.pcCmd = PC_MOVE,(1,0)
         elif key == Qt.Key_S:
             self.pcCmd = PC_SEARCH,None
+
+        #level up and down
+        if key == Qt.Key_Comma:
+            self.pcCmd = PC_DOWNSTAIR,None
+        if key == Qt.Key_Period:
+            self.pcCmd = PC_UPSTAIR,None
+
         #quit
         if key == Qt.Key_Q and sft:
             sys.exit()
+
         if self.pcCmd:
             self.step()

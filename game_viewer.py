@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/08/2009 16:00:27>
+# last-update-time: <halida 11/08/2009 16:35:54>
 # ---------------------------------
 # 
 
@@ -40,7 +40,8 @@ class GameViewer(QGraphicsView):
         connect(self.game,game.PCMOVED,self.updateSprites)
 
     def updateMap(self):
-        self.mapGraph = map_graph.MapGraph(self.game.map)
+        self.mapGraph = map_graph.MapGraph(self.game)
+        connect(self.game,game.MAPCHANGED,self.mapGraph.updateMap)
         self.scene.addItem(self.mapGraph)
 
     def updateSprites(self):
