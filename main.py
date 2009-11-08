@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/07/2009 15:03:50>
+# last-update-time: <halida 11/08/2009 12:33:44>
 # ---------------------------------
 # 
 
@@ -58,10 +58,16 @@ class GameView(QGraphicsView):
         super(GameView,self).__init__()
         self.setRenderHint(QPainter.Antialiasing)
         self.scene = QGraphicsScene()
-        #self.scene.setSceneRect(0,0,MAX_MAPX,MAX_MAPY)
         self.setScene(self.scene)
-        #self.translate(MAX_MAPX,MAX_MAPY)
         self.sprites = {}
+
+    def wheelEvent(self,event):
+        """
+        use mouse wheel to scale the screen.
+        """
+        factor = 1.41 ** (-event.delta()/240.0)
+        #print factor
+        self.scale(factor,factor)
 
     def setGame(self,g):
         self.game = g
@@ -78,20 +84,22 @@ class GameView(QGraphicsView):
         self.scene.addItem(self.mapGraph)
 
     def updateSprites(self):
+        print "update sprite.."
         for sprite in self.game.sprites:
             #check sprites exists
             if self.sprites.has_key(sprite):
-                spriteGraph = self.sprites[sprites]
+                spriteGraph = self.sprites[sprite]
             else:
                 spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
+                spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
                 spriteGraph.setBrush(QColor(Qt.red))
                 self.scene.addItem(spriteGraph)
+                self.sprites[sprite] = spriteGraph
             #check pos
             spos = sprite.getPos()
             gpos = spriteGraph.pos()
             gposx,gposy = gpos.x(),gpos.y()
             if (gposx/P_SIZE <> spos[0]) or (gposy/P_SIZE <> spos[1]):
-                #print spos
                 spriteGraph.setPos(spos[0]*P_SIZE,
                                    spos[1]*P_SIZE)
 
