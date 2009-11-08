@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 12:58:39>
+# last-update-time: <halida 11/08/2009 13:03:10>
 # ---------------------------------
 # 
 
@@ -103,7 +103,7 @@ class GameView(QGraphicsView):
                                    spos[1]*P_SIZE)
 
 class MessageViewer(QListWidget):
-    MAX_COUNT = 200
+    MAX_COUNT = 20
     def __init__(self,g):
         super(MessageViewer,self).__init__()
         self.game = g
@@ -112,7 +112,7 @@ class MessageViewer(QListWidget):
     def showMsg(self,msg):
         self.insertItem(0,msg)
         if self.count() > self.MAX_COUNT:
-            self.removeItemWidget(self.item(self.MAX_COUNT-1))
+            self.takeItem(self.MAX_COUNT)
 
 class M(QMainWindow):
     def init(self):
