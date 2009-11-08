@@ -2,13 +2,15 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 13:03:10>
+# last-update-time: <halida 11/08/2009 14:45:54>
 # ---------------------------------
 # 
 
 from qtlib import *
 
-import game,test_map1
+import game,test_map1,test_module1
+
+import inv_viewer
 
 MAX_MAP_SIZE = MAX_MAPX,MAX_MAPY =60,40
 
@@ -118,12 +120,15 @@ class M(QMainWindow):
     def init(self):
         self.game = game.Game()
         self.game.loadMap(test_map1)
+        self.game.loadModule(test_module1)
         self.v = GameView()
         self.v.setGame(self.game)
         self.messageViewer = MessageViewer(self.game)
+        self.invViewer = inv_viewer.InvViewer(self.game)
         #layout
         self.setCentralWidget(self.v)
-        addDockWidget(self,'message shower',self.messageViewer)
+        addDockWidget(self,'inventory viewer',self.invViewer)
+        addDockWidget(self,'message viewer',self.messageViewer)
         #event
         self.resize(800,600)
         self.show()

@@ -2,14 +2,14 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/08/2009 12:40:35>
+# last-update-time: <halida 11/08/2009 14:25:01>
 # ---------------------------------
 # 
 
 class Sprite(object):
     def __init__(self):
         self.setPos(0,0)
-
+    # movable
     def setPos(self,x,y):
         self.px = x
         self.py = y
@@ -24,7 +24,3 @@ class Sprite(object):
     def moveTo(self,x,y):
         self.px = x
         self.py = y
-
-class PC(Sprite):
-    def __init__(self):
-        super(PC,self).__init__()

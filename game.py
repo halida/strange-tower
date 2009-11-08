@@ -2,18 +2,19 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 12:58:09>
+# last-update-time: <halida 11/08/2009 14:44:17>
 # ---------------------------------
 # 
 
 from qtlib import *
-import sprite
+import sprite,pc
 
 PC_NOP,PC_MOVE,PC_SEARCH = range(3)
 
 #events
 PCMOVED = 'pcMoved()'
 ONMESSAGE = 'onMessage(QString)'
+ONINVCHANGE = 'onInvChange()'
 
 class Game(QObject):
     def __init__(self):
@@ -21,13 +22,17 @@ class Game(QObject):
         self.map = None
         self.sprites = []
         self.items = []
-        self.pc = sprite.PC()
+        self.pc = pc.PC()
         self.pcCmd = None
+        self.pcinv = []
 
     def loadMap(self,map):
         self.map = map.map.split('\n')
         self.pc.setPos(*map.pc_pos)
         self.sprites.append(self.pc)
+
+    def loadModule(self,module):
+        module.setGame(self)
 
     def step(self):
         #split cmd
