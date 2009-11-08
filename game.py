@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 12:22:15>
+# last-update-time: <halida 11/08/2009 12:40:37>
 # ---------------------------------
 # 
 
@@ -24,7 +24,7 @@ class Game(QObject):
         self.pcCmd = None
 
     def loadMap(self,map):
-        self.map = map.map
+        self.map = map.map.split('\n')
         self.pc.setPos(*map.pc_pos)
         self.sprites.append(self.pc)
 
@@ -32,8 +32,14 @@ class Game(QObject):
         #pc cmd
         cmd, args = self.pcCmd
         if cmd == PC_MOVE:
-            self.pc.move(*args)
+            newlocation = (args[0] + self.pc.px,
+                           args[1] + self.pc.py)
+            if not self.checkCollideToMap(*newlocation):
+                self.pc.move(*args)
         emit(self,PCMOVED)
+        
+    def checkCollideToMap(self,x,y):
+        return self.map[y][x] != '.'
 
     def evalKeymap(self,key):
         self.pcCmd = None

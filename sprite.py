@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/07/2009 15:00:40>
+# last-update-time: <halida 11/08/2009 12:40:35>
 # ---------------------------------
 # 
 
@@ -20,6 +20,10 @@ class Sprite(object):
     def move(self,x,y):
         self.px += x
         self.py += y
+
+    def moveTo(self,x,y):
+        self.px = x
+        self.py = y
 
 class PC(Sprite):
     def __init__(self):

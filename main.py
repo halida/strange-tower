@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 12:33:44>
+# last-update-time: <halida 11/08/2009 12:41:00>
 # ---------------------------------
 # 
 
@@ -37,7 +37,7 @@ class MapGraph(QGraphicsItem):
         #draw background
         painter.fillRect(self.rect,self.bgcolor)
         #draw map
-        for y,row in enumerate(self.map.split('\n')):
+        for y,row in enumerate(self.map):
             for x,floor in enumerate(row):
                 #print x,y,floor
                 color = self.floorToPicture(floor)
@@ -84,7 +84,6 @@ class GameView(QGraphicsView):
         self.scene.addItem(self.mapGraph)
 
     def updateSprites(self):
-        print "update sprite.."
         for sprite in self.game.sprites:
             #check sprites exists
             if self.sprites.has_key(sprite):
