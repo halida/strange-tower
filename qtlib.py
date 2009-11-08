@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/10/24 07:54:49>
-# last-update-time: <halida 11/07/2009 11:32:18>
+# last-update-time: <halida 11/08/2009 12:52:53>
 # ---------------------------------
 # 
 
@@ -28,7 +28,7 @@ def connect(fromObj, signal, to, optional=None):
 def emit(obj,signal,*args):
     obj.emit(SIGNAL(signal),*args)
 
-def addDockWidget(parent,name,widget,place,objname=None,allowed=None):
+def addDockWidget(parent,name,widget,place=Qt.LeftDockWidgetArea,objname=None,allowed=None):
     if not isinstance(parent, QMainWindow):
         raise Exception("Only mainwindow can add dock widget: %s"%unicode(parent))
     if not objname:

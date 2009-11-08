@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 12:41:00>
+# last-update-time: <halida 11/08/2009 12:58:39>
 # ---------------------------------
 # 
 
@@ -102,6 +102,17 @@ class GameView(QGraphicsView):
                 spriteGraph.setPos(spos[0]*P_SIZE,
                                    spos[1]*P_SIZE)
 
+class MessageViewer(QListWidget):
+    MAX_COUNT = 200
+    def __init__(self,g):
+        super(MessageViewer,self).__init__()
+        self.game = g
+        connect(self.game,game.ONMESSAGE,self.showMsg)
+        
+    def showMsg(self,msg):
+        self.insertItem(0,msg)
+        if self.count() > self.MAX_COUNT:
+            self.removeItemWidget(self.item(self.MAX_COUNT-1))
 
 class M(QMainWindow):
     def init(self):
@@ -109,8 +120,10 @@ class M(QMainWindow):
         self.game.loadMap(test_map1)
         self.v = GameView()
         self.v.setGame(self.game)
+        self.messageViewer = MessageViewer(self.game)
         #layout
         self.setCentralWidget(self.v)
+        addDockWidget(self,'message shower',self.messageViewer)
         #event
         self.resize(800,600)
         self.show()
