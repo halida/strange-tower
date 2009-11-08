@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 14:44:17>
+# last-update-time: <halida 11/08/2009 15:07:34>
 # ---------------------------------
 # 
 
@@ -57,8 +57,9 @@ class Game(QObject):
     def checkCollideToMap(self,x,y):
         return self.map[y][x] == '#'
 
-    def evalKeymap(self,key):
+    def evalKeymap(self,key,sft,ctl,alt):
         self.pcCmd = None
+        #move
         if key == Qt.Key_J:
             self.pcCmd = PC_MOVE,(0,1)
         elif key == Qt.Key_K:
@@ -69,5 +70,8 @@ class Game(QObject):
             self.pcCmd = PC_MOVE,(1,0)
         elif key == Qt.Key_S:
             self.pcCmd = PC_SEARCH,None
+        #quit
+        if key == Qt.Key_Q and sft:
+            sys.exit()
         if self.pcCmd:
             self.step()
