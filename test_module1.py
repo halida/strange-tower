@@ -2,11 +2,13 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/08/2009 16:47:43>
+# last-update-time: <halida 11/08/2009 19:52:36>
 # ---------------------------------
 # 
 
 from items import *
+
+import random_map
 
 map1 = """
 ########################################
@@ -62,8 +64,10 @@ def setGame(game):
         ]
     game.levels = [
         map1.split('\n'),
-        map2.split('\n'),
-        map3.split('\n'),
+        #ap2.split('\n'),
+        random_map.randomMap(),
+        random_map.randomMap(upStair=False),
+        #ap3.split('\n'),
         ]
-    game.currentLevel = 2
+    game.currentLevel = 0
     game.pc.setPos(2,2)

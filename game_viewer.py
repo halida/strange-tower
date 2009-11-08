@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/08/2009 16:35:54>
+# last-update-time: <halida 11/08/2009 19:55:51>
 # ---------------------------------
 # 
 
@@ -20,7 +20,7 @@ class GameViewer(QGraphicsView):
         self.setScene(self.scene)
         self.sprites = {}
         self.setGame(g)
-        #self.scale(0.3,0.3)
+        self.scale(0.8,0.8)
 
     def wheelEvent(self,event):
         """

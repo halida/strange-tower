@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 16:19:22>
+# last-update-time: <halida 11/08/2009 19:54:46>
 # ---------------------------------
 # 
 
@@ -38,7 +38,7 @@ class M(QMainWindow):
         addDockWidget(self,'inventory viewer',self.iv)
         addDockWidget(self,'message viewer',self.mv)
         #event
-        self.resize(800,600)
+        self.setWindowState(Qt.WindowMaximized)
         self.show()
 
     def keyPressEvent(self,event):

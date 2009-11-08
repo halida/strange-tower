@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 16:50:02>
+# last-update-time: <halida 11/08/2009 17:45:09>
 # ---------------------------------
 # 
 
@@ -65,12 +65,15 @@ class Game(QObject):
     def updateMap(self,maplevel):
         self.currentLevel += maplevel
         self.map = self.levels[self.currentLevel]
+        newloc = None
         for y,row in enumerate(self.map):
             for x,floor in enumerate(row):
                 if maplevel > 0 and floor == '<':
                     newloc = x,y
                 if maplevel < 0 and floor == '>':
                     newloc = x,y
+        if not newloc:
+            raise Exception('map do not have stairs, check the map!')
         self.pc.setPos(*newloc)
         emit(self,MAPCHANGED)
         emit(self,PCMOVED)
