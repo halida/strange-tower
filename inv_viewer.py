@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:42:37>
-# last-update-time: <halida 11/08/2009 14:44:48>
+# last-update-time: <halida 11/08/2009 20:23:24>
 # ---------------------------------
 # 
 
@@ -20,7 +20,7 @@ class InvViewer(QListWidget):
         self.updateInv()
 
     def updateInv(self):
-        self.clear
+        self.clear()
         for item in self.game.pcInv:
             self.addItem(item[NAME])
 

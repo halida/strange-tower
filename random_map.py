@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 08:55:52>
-# last-update-time: <halida 11/08/2009 19:53:13>
+# last-update-time: <halida 11/08/2009 20:32:41>
 # ---------------------------------
 # 
 
@@ -103,7 +103,7 @@ def randomMap(upStair=True,downStair=True):
             r2[0][1] + randint(0,r2[1][1]-1),
             )
         p3 = p1[0],p2[1]
-        print p1,p2,p3
+        #print p1,p2,p3
         for i in range(abs(p1[1]-p3[1])):
             map [ i + min(p1[1], p3[1]) ] [ p1[0] ] = ' '
         for i in range(abs(p2[0]-p3[0])):
@@ -129,14 +129,14 @@ def randomMap(upStair=True,downStair=True):
         map[downy][downx] = '<'
 
     #show map
-    for r in rooms:
-        print r
-    if upStair:
-        print upP
-    if downStair:
-        print downP
-    for row in map:
-        print ''.join(row)
+    # for r in rooms:
+    #     print r
+    # if upStair:
+    #     print upP
+    # if downStair:
+    #     print downP
+    # for row in map:
+    #     print ''.join(row)
     return map
 
     

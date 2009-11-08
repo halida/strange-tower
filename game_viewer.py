@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/08/2009 19:55:51>
+# last-update-time: <halida 11/08/2009 21:30:36>
 # ---------------------------------
 # 
 
@@ -15,10 +15,10 @@ import game,map_graph
 class GameViewer(QGraphicsView):
     def __init__(self,g):
         super(GameViewer,self).__init__()
+        self.sprites = {}
         self.setRenderHint(QPainter.Antialiasing)
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
-        self.sprites = {}
         self.setGame(g)
         self.scale(0.8,0.8)
 
@@ -32,17 +32,19 @@ class GameViewer(QGraphicsView):
     def setGame(self,g):
         self.game = g
 
-        self.scene.clear()
         self.updateMap()
-        self.updateSprites()
 
         #events
+        connect(self.game,game.MAPCHANGED,self.updateMap)
         connect(self.game,game.PCMOVED,self.updateSprites)
+        connect(self.game,game.ITEMCHANGED,self.updateSprites)
 
     def updateMap(self):
+        self.sprites = {}
+        self.scene.clear()
         self.mapGraph = map_graph.MapGraph(self.game)
-        connect(self.game,game.MAPCHANGED,self.mapGraph.updateMap)
         self.scene.addItem(self.mapGraph)
+        self.updateSprites()
 
     def updateSprites(self):
         for sprite in self.game.sprites:
@@ -52,9 +54,11 @@ class GameViewer(QGraphicsView):
             else:
                 spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
                 spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
+                spriteGraph.setZValue(1)
                 spriteGraph.setBrush(QColor(Qt.red))
                 self.scene.addItem(spriteGraph)
                 self.sprites[sprite] = spriteGraph
+                #print "adding:",sprite
             #check pos
             spos = sprite.getPos()
             gpos = spriteGraph.pos()

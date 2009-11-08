@@ -2,31 +2,38 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 17:45:09>
+# last-update-time: <halida 11/08/2009 21:39:48>
 # ---------------------------------
 # 
 
 from qtlib import *
+from items import *
+
 import sprite,pc
 
-(PC_NOP,PC_MOVE,PC_SEARCH,PC_DOWNSTAIR,PC_UPSTAIR) = range(5)
+(PC_NOP,PC_MOVE,PC_SEARCH,
+ PC_DOWNSTAIR,PC_UPSTAIR,
+ PC_DROP,PC_PICKUP,
+ ) = range(7)
 
 #events
 PCMOVED = 'pcMoved()'
 MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
 ONINVCHANGE = 'onInvChange()'
+ITEMCHANGED = 'itemChanged()'
 
 class Game(QObject):
-    def __init__(self):
+    def __init__(self,uiwrapper):
         super(Game,self).__init__()
+        self.uiwrapper = uiwrapper
+        uiwrapper.game = self
         self.map = None
         self.sprites = []
-        self.items = []
         self.pc = pc.PC()
         self.sprites.append(self.pc)
         self.pcCmd = None
-        self.pcinv = []
+        self.pcInv = []
 
     def loadModule(self,module):
         module.setGame(self)
@@ -48,25 +55,39 @@ class Game(QObject):
             self.msg('Searching...')            
             
         elif cmd == PC_DOWNSTAIR:
-            if self.map[self.pc.py][self.pc.px] != '<':
-                print self.map[self.pc.px][self.pc.px],self.pc.getPos()
+            if self.map['map'][self.pc.py][self.pc.px] != '<':
                 self.msg('there is no downstair here.')
             else:
                 self.updateMap(-1)
         elif cmd == PC_UPSTAIR:
-            if self.map[self.pc.py][self.pc.px] != '>':
+            if self.map['map'][self.pc.py][self.pc.px] != '>':
                 self.msg('there is no upstair here.')
             else:
                 self.updateMap(1)
 
+        elif cmd == PC_DROP:
+            item = self.pcInv.pop(args)
+            self.sprites.append(sprite.Sprite(self.pc.getPos()))#todo
+            self.msg('drop item: '+item[NAME])
+            emit(self,ONINVCHANGE)
+            emit(self,ITEMCHANGED)
         else:
             raise Exception("this cmd not defined:",self.pcCmd)
 
     def updateMap(self,maplevel):
+        #save old map
+        self.sprites.pop(0)#pop pc
+        self.map['sprites'] = [s.pack() for s in self.sprites]
+        #print self.levels[self.currentLevel],self.currentLevel
+        self.sprites = []
+
+        #load new map
         self.currentLevel += maplevel
         self.map = self.levels[self.currentLevel]
+
+        #get up/down stairs location
         newloc = None
-        for y,row in enumerate(self.map):
+        for y,row in enumerate(self.map['map']):
             for x,floor in enumerate(row):
                 if maplevel > 0 and floor == '<':
                     newloc = x,y
@@ -75,15 +96,23 @@ class Game(QObject):
         if not newloc:
             raise Exception('map do not have stairs, check the map!')
         self.pc.setPos(*newloc)
+
+        #set sprites
+        if self.map.has_key('sprites'):
+            self.sprites = [sprite.Sprite.load(s) for s in self.map['sprites']]
+        self.sprites.insert(0,self.pc)
+
+        #event
+        self.msg("move to level:%d"%self.currentLevel)
         emit(self,MAPCHANGED)
         emit(self,PCMOVED)
-        print "map changed to level:",self.currentLevel
+
 
     def msg(self,m):
         emit(self,ONMESSAGE,m)
         
     def checkCollideToMap(self,x,y):
-        return self.map[y][x] == '#'
+        return self.map['map'][y][x] == '#'
 
     def evalKeymap(self,key,sft,ctl,alt):
         self.pcCmd = None
@@ -104,6 +133,12 @@ class Game(QObject):
             self.pcCmd = PC_DOWNSTAIR,None
         if key == Qt.Key_Period:
             self.pcCmd = PC_UPSTAIR,None
+
+        #item pick up and drop
+        if key == Qt.Key_D:
+            itemNum = self.uiwrapper.selectItem()
+            if itemNum<>None:
+                self.pcCmd = PC_DROP,itemNum
 
         #quit
         if key == Qt.Key_Q and sft:

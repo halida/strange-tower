@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/08/2009 19:52:36>
+# last-update-time: <halida 11/08/2009 20:38:47>
 # ---------------------------------
 # 
 
@@ -63,11 +63,9 @@ def setGame(game):
         I_t_shirt,
         ]
     game.levels = [
-        map1.split('\n'),
-        #ap2.split('\n'),
-        random_map.randomMap(),
-        random_map.randomMap(upStair=False),
-        #ap3.split('\n'),
+        dict(map=map1.split('\n'),),
+        dict(map=random_map.randomMap(),),
+        dict(map=random_map.randomMap(upStair=False),),
         ]
     game.currentLevel = 0
     game.pc.setPos(2,2)
