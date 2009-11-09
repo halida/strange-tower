@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:42:37>
-# last-update-time: <halida 11/08/2009 20:23:24>
+# last-update-time: <halida 11/09/2009 07:57:07>
 # ---------------------------------
 # 
 
@@ -16,7 +16,7 @@ class InvViewer(QListWidget):
     def __init__(self,g):
         super(InvViewer,self).__init__()
         self.game = g
-        connect(self.game,game.ONINVCHANGE,self.updateInv)
+        connect(self.game,game.INVCHANGED,self.updateInv)
         self.updateInv()
 
     def updateInv(self):

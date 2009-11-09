@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 20:24:12>
+# last-update-time: <halida 11/08/2009 21:42:55>
 # ---------------------------------
 # 
 
@@ -33,6 +33,7 @@ class MessageViewer(QListWidget):
         
     def showMsg(self,msg):
         self.insertItem(0,msg)
+        self.setCurrentRow(0)
         if self.count() > self.MAX_COUNT:
             self.takeItem(self.MAX_COUNT)
 

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/08/2009 21:39:48>
+# last-update-time: <halida 11/09/2009 08:03:27>
 # ---------------------------------
 # 
 
@@ -20,8 +20,9 @@ import sprite,pc
 PCMOVED = 'pcMoved()'
 MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
-ONINVCHANGE = 'onInvChange()'
+INVCHANGED = 'invChanged()'
 ITEMCHANGED = 'itemChanged()'
+SPRITESCHANGED = 'spriteChanged(int)'
 
 class Game(QObject):
     def __init__(self,uiwrapper):
@@ -67,12 +68,34 @@ class Game(QObject):
 
         elif cmd == PC_DROP:
             item = self.pcInv.pop(args)
-            self.sprites.append(sprite.Sprite(self.pc.getPos()))#todo
+            s = sprite.Sprite(self.pc.getPos())
+            s.data = item
+            self.sprites.append(s)
             self.msg('drop item: '+item[NAME])
-            emit(self,ONINVCHANGE)
+            emit(self,INVCHANGED)
             emit(self,ITEMCHANGED)
+
+        elif cmd == PC_PICKUP:
+            s = self.getSpriteByPos(*self.pc.getPos())
+            if not s:
+                self.msg('Nothing on the groud.')
+            else:
+                self.msg('pick upped: %s'%s.data[NAME])
+                index = self.sprites.index(s)
+                self.sprites.remove(s)
+                self.pcInv.append(s.data)
+                emit(self,SPRITESCHANGED,index)
+                emit(self,INVCHANGED)
+
         else:
             raise Exception("this cmd not defined:",self.pcCmd)
+
+    def getSpriteByPos(self,x,y):
+        for s in self.sprites:
+            if s == self.pc: continue
+            if s.getPos() == (x,y):
+                return s
+        return None
 
     def updateMap(self,maplevel):
         #save old map
@@ -129,9 +152,9 @@ class Game(QObject):
             self.pcCmd = PC_SEARCH,None
 
         #level up and down
-        if key == Qt.Key_Comma:
+        if key == Qt.Key_Less:
             self.pcCmd = PC_DOWNSTAIR,None
-        if key == Qt.Key_Period:
+        if key == Qt.Key_Greater:
             self.pcCmd = PC_UPSTAIR,None
 
         #item pick up and drop
@@ -139,6 +162,8 @@ class Game(QObject):
             itemNum = self.uiwrapper.selectItem()
             if itemNum<>None:
                 self.pcCmd = PC_DROP,itemNum
+        if key == Qt.Key_Comma:
+            self.pcCmd = PC_PICKUP,None
 
         #quit
         if key == Qt.Key_Q and sft:
