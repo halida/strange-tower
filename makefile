@@ -8,3 +8,6 @@ clean:
 #test view point translate
 t_v:
 	python test_viewpoint.py
+#test opengl
+t_gl:
+	python test_opengl.py
