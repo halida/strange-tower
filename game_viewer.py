@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 12:37:50>
+# last-update-time: <halida 11/10/2009 12:45:08>
 # ---------------------------------
 # 
 
@@ -78,9 +78,8 @@ class GameViewer(QGraphicsView):
                 else:
                     spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
                     spriteGraph.setBrush(QColor(Qt.red))
-
-                spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
-                z = 10 if s==self.game.pc else 0
+                #spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
+                z = 10 if s==self.game.pc else 1
                 spriteGraph.setZValue(z)
                 self.scene.addItem(spriteGraph)
                 self.sprites.insert(i, (s,spriteGraph) )

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/10/2009 11:30:03>
+# last-update-time: <halida 11/10/2009 15:15:22>
 # ---------------------------------
 # 
 
@@ -11,10 +11,7 @@ from items import *
 
 import sprite,pc
 
-(PC_NOP,PC_MOVE,PC_SEARCH,
- PC_DOWNSTAIR,PC_UPSTAIR,
- PC_DROP,PC_PICKUP,
- ) = range(7)
+from keymap import *
 
 #events
 PCMOVED = 'pcMoved()'
@@ -28,65 +25,17 @@ class Game(QObject):
         super(Game,self).__init__()
         self.uiwrapper = uiwrapper
         uiwrapper.game = self
+        self.pcCmdPhaser = PCCmdPhaser(self)
         self.map = None
         self.sprites = []
         self.pc = pc.PC()
         self.sprites.append(self.pc)
-        self.pcCmd = None
         self.pcInv = []
+        self.evalKeymap = self.pcCmdPhaser.evalKeymap
 
     def loadModule(self,module):
         module.setGame(self)
         self.map = self.levels[self.currentLevel]
-
-    def step(self):
-        #split cmd
-        cmd, args = self.pcCmd
-        if cmd == PC_MOVE:
-            newlocation = (args[0] + self.pc.px,
-                           args[1] + self.pc.py)
-            if not self.checkCollideToMap(*newlocation):
-                self.pc.move(*args)
-                emit(self,PCMOVED)
-            else:
-                self.msg('Opps,you hit a wall.')
-
-        elif cmd == PC_SEARCH:
-            self.msg('Searching...')            
-            
-        elif cmd == PC_DOWNSTAIR:
-            if self.map['downstair'] <> self.pc.getPos():
-                self.msg('there is no downstair here.')
-            else:
-                self.changeMap(-1)
-        elif cmd == PC_UPSTAIR:
-            if self.map['upstair'] <> self.pc.getPos():
-                self.msg('there is no upstair here.')
-            else:
-                self.changeMap(1)
-
-        elif cmd == PC_DROP:
-            item = self.pcInv.pop(args)
-            s = sprite.Item(self.pc.getPos(),item)
-            self.sprites.append(s)
-            self.msg('drop item: '+s.getName())
-            emit(self,INVCHANGED)
-            emit(self,SPRITECHANGED,len(self.sprites)-1)
-
-        elif cmd == PC_PICKUP:
-            s = self.getSpriteByPos(*self.pc.getPos())
-            if not s or not isinstance(s,sprite.Item):
-                self.msg('Nothing on the groud.')
-            else:
-                self.msg('pick upped: %s'%s.getName())
-                index = self.sprites.index(s)
-                self.sprites.remove(s)
-                self.pcInv.append(s.itemdata)
-                emit(self,SPRITECHANGED,index)
-                emit(self,INVCHANGED)
-
-        else:
-            raise Exception("this cmd not defined:",self.pcCmd)
 
     def getSpriteByPos(self,x,y):
         for s in self.sprites:
@@ -134,37 +83,90 @@ class Game(QObject):
     def checkCollideToMap(self,x,y):
         return self.map['map'][y][x] == '#'
 
+class PCCmdPhaser():
+    def __init__(self,g):
+        self.g = g
+        self.mapper = {
+            PC_SEARCH                 : self.pcSearch,
+            
+            PC_MOVE_UP                : lambda :self.pcMove( 0,-1),
+            PC_MOVE_DOWN              : lambda :self.pcMove( 0, 1),
+            PC_MOVE_LEFT              : lambda :self.pcMove(-1, 0),
+            PC_MOVE_RIGHT             : lambda :self.pcMove( 1, 0),
+
+            PC_MOVE_UP_LEFT           : lambda :self.pcMove(-1,-1),
+            PC_MOVE_UP_RIGHT          : lambda :self.pcMove( 1,-1),
+            PC_MOVE_DOWN_LEFT         : lambda :self.pcMove(-1, 1),
+            PC_MOVE_DOWN_RIGHT        : lambda :self.pcMove( 1, 1),
+
+            PC_DOWNSTAIR              : lambda: self.pcStair(-1),
+            PC_UPSTAIR                : lambda: self.pcStair( 1),
+
+            PC_DROP                   : self.pcDrop,
+            PC_PICKUP                 : self.pcPickup,
+            PC_QUIT                   : self.pcQuit,
+            
+            }
+
     def evalKeymap(self,key,sft,ctl,alt):
-        self.pcCmd = None
-        #move
-        if key == Qt.Key_J:
-            self.pcCmd = PC_MOVE,(0,1)
-        elif key == Qt.Key_K:
-            self.pcCmd = PC_MOVE,(0,-1)
-        elif key == Qt.Key_H:
-            self.pcCmd = PC_MOVE,(-1,0)
-        elif key == Qt.Key_L:
-            self.pcCmd = PC_MOVE,(1,0)
-        elif key == Qt.Key_S:
-            self.pcCmd = PC_SEARCH,None
+        try:
+            cmd = key2func[key]
+        except:
+            return
+        self.phase(cmd)
 
-        #level up and down
-        if key == Qt.Key_Less:
-            self.pcCmd = PC_DOWNSTAIR,None
-        if key == Qt.Key_Greater:
-            self.pcCmd = PC_UPSTAIR,None
+    def phase(self,cmd):
+        try:
+            fun = self.mapper[cmd]
+        except:
+            raise Exception("this cmd not defined:",cmd)
+        fun()
 
-        #item pick up and drop
-        if key == Qt.Key_D:
-            itemNum = self.uiwrapper.selectItem()
-            if itemNum<>None:
-                self.pcCmd = PC_DROP,itemNum
-        if key == Qt.Key_Comma:
-            self.pcCmd = PC_PICKUP,None
+    def pcMove(self,dx,dy):
+        newloc = (dx + self.g.pc.px,
+                  dy + self.g.pc.py)
+        if not self.g.checkCollideToMap(*newloc):
+            self.g.pc.move(dx,dy)
+            emit(self.g,PCMOVED)
+        else:
+            self.g.msg('Opps,you hit a wall.')
+            
+    def pcSearch(self):
+        self.g.msg('Searching...')            
+            
+    def pcStair(self,stair):
+        if stair == -1:
+            if self.g.map['downstair'] <> self.g.pc.getPos():
+                self.g.msg('there is no downstair here.')
+            else:
+                self.g.changeMap(-1)
+        elif stair == 1:
+            if self.g.map['upstair'] <> self.g.pc.getPos():
+                self.g.msg('there is no upstair here.')
+            else:
+                self.g.changeMap(1)
+        else:
+            raise Exception("stair error:",stair)
 
-        #quit
-        if key == Qt.Key_Q and sft:
-            sys.exit()
+    def pcDrop(self):
+        item = self.g.pcInv.pop(args)
+        s = sprite.Item(self.g.pc.getPos(),item)
+        self.g.sprites.append(s)
+        self.g.msg('drop item: '+s.getName())
+        emit(self.g,INVCHANGED)
+        emit(self.g,SPRITECHANGED,len(self.g.sprites)-1)
 
-        if self.pcCmd:
-            self.step()
+    def pcPickup(self):
+        s = self.g.getSpriteByPos(*self.pc.getPos())
+        if not s or not isinstance(s,sprite.Item):
+            self.g.msg('Nothing on the groud.')
+        else:
+            self.g.msg('pick upped: %s'%s.getName())
+            index = self.g.sprites.index(s)
+            self.g.sprites.remove(s)
+            self.g.pcInv.append(s.itemdata)
+            emit(self.g,SPRITECHANGED,index)
+            emit(self.g,INVCHANGED)
+            
+    def pcQuit(self):
+        sys.exit(0)
