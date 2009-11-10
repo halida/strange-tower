@@ -2,13 +2,15 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 08:55:52>
-# last-update-time: <halida 11/08/2009 20:32:41>
+# last-update-time: <halida 11/10/2009 11:07:52>
 # ---------------------------------
 # 
 
 from viewlib import *
 
 import random
+
+import sprite
 
 randint = random.randint
 
@@ -54,6 +56,7 @@ def randomMap(upStair=True,downStair=True):
             rooms.append(room)
 
     #set up/down stairs
+    upP, downP = None,None
     if upStair:
         room_num = randint(0,len(rooms)-1)
         room = rooms[room_num]
@@ -120,14 +123,6 @@ def randomMap(upStair=True,downStair=True):
                 x = j + rx
                 map[y][x] = '.'
 
-    #create up/downstair
-    if upStair:
-        upx,upy = upP
-        map[upy][upx] = '>'
-    if downStair:
-        downx,downy = downP
-        map[downy][downx] = '<'
-
     #show map
     # for r in rooms:
     #     print r
@@ -137,6 +132,17 @@ def randomMap(upStair=True,downStair=True):
     #     print downP
     # for row in map:
     #     print ''.join(row)
-    return map
+    return createMap(map,upP,downP)
 
+def createMap(map,upP=None,downP=None):
+    if type(map) == type(""):
+        map = map.split("\n")
+    sprites = []
+    if upP:
+        sprites.append(sprite.Stair(upP,upstair=True))
+    if downP:
+        sprites.append(sprite.Stair(downP,downstair=True))
+    return dict(map=map,
+                upstair=upP,downstair=downP,
+                sprites=sprites)
     

@@ -2,13 +2,12 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/08/2009 21:52:02>
+# last-update-time: <halida 11/10/2009 11:29:41>
 # ---------------------------------
 # 
 
 class Sprite(object):
     def __init__(self,pos=(0,0)):
-        self.data = None
         self.setPos(*pos)
 
     # movable
@@ -24,13 +23,17 @@ class Sprite(object):
         self.px = x
         self.py = y
 
-    #pack and load
-    def pack(self):
-        return dict(pos=self.getPos(),data=self.data)
-    @staticmethod
-    def load(data):
-        s = Sprite()
-        s.setPos(*data['pos'])
-        s.data=data['data']
-        return s
+class Item(Sprite):
+    def __init__(self,pos,itemdata):
+        super(Item,self).__init__()
+        self.itemdata = itemdata
+        self.setPos(*pos)
+    def getName(self):
+        return self.itemdata['name']
 
+class Stair(Sprite):
+    def __init__(self,pos,upstair=False,downstair=False):
+        super(Stair,self).__init__()
+        self.upstair = upstair
+        self.downstair = downstair
+        self.setPos(*pos)

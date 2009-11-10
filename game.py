@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/09/2009 08:03:27>
+# last-update-time: <halida 11/10/2009 11:30:03>
 # ---------------------------------
 # 
 
@@ -21,8 +21,7 @@ PCMOVED = 'pcMoved()'
 MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
 INVCHANGED = 'invChanged()'
-ITEMCHANGED = 'itemChanged()'
-SPRITESCHANGED = 'spriteChanged(int)'
+SPRITECHANGED = 'spriteChanged(int)'
 
 class Game(QObject):
     def __init__(self,uiwrapper):
@@ -56,35 +55,34 @@ class Game(QObject):
             self.msg('Searching...')            
             
         elif cmd == PC_DOWNSTAIR:
-            if self.map['map'][self.pc.py][self.pc.px] != '<':
+            if self.map['downstair'] <> self.pc.getPos():
                 self.msg('there is no downstair here.')
             else:
-                self.updateMap(-1)
+                self.changeMap(-1)
         elif cmd == PC_UPSTAIR:
-            if self.map['map'][self.pc.py][self.pc.px] != '>':
+            if self.map['upstair'] <> self.pc.getPos():
                 self.msg('there is no upstair here.')
             else:
-                self.updateMap(1)
+                self.changeMap(1)
 
         elif cmd == PC_DROP:
             item = self.pcInv.pop(args)
-            s = sprite.Sprite(self.pc.getPos())
-            s.data = item
+            s = sprite.Item(self.pc.getPos(),item)
             self.sprites.append(s)
-            self.msg('drop item: '+item[NAME])
+            self.msg('drop item: '+s.getName())
             emit(self,INVCHANGED)
-            emit(self,ITEMCHANGED)
+            emit(self,SPRITECHANGED,len(self.sprites)-1)
 
         elif cmd == PC_PICKUP:
             s = self.getSpriteByPos(*self.pc.getPos())
-            if not s:
+            if not s or not isinstance(s,sprite.Item):
                 self.msg('Nothing on the groud.')
             else:
-                self.msg('pick upped: %s'%s.data[NAME])
+                self.msg('pick upped: %s'%s.getName())
                 index = self.sprites.index(s)
                 self.sprites.remove(s)
-                self.pcInv.append(s.data)
-                emit(self,SPRITESCHANGED,index)
+                self.pcInv.append(s.itemdata)
+                emit(self,SPRITECHANGED,index)
                 emit(self,INVCHANGED)
 
         else:
@@ -97,39 +95,38 @@ class Game(QObject):
                 return s
         return None
 
-    def updateMap(self,maplevel):
+    def changeMap(self,direct=None,level=None):
         #save old map
-        self.sprites.pop(0)#pop pc
-        self.map['sprites'] = [s.pack() for s in self.sprites]
-        #print self.levels[self.currentLevel],self.currentLevel
-        self.sprites = []
+        if self.map:
+            self.sprites.pop(0)#pop pc
+            self.map['sprites'] = self.sprites
+            self.sprites = []
 
         #load new map
-        self.currentLevel += maplevel
+        if direct:
+            self.currentLevel += direct
+        elif level<>None:
+            self.currentLevel = level
+        else:
+            raise Exception('changeMap have no params!')
         self.map = self.levels[self.currentLevel]
 
-        #get up/down stairs location
-        newloc = None
-        for y,row in enumerate(self.map['map']):
-            for x,floor in enumerate(row):
-                if maplevel > 0 and floor == '<':
-                    newloc = x,y
-                if maplevel < 0 and floor == '>':
-                    newloc = x,y
-        if not newloc:
-            raise Exception('map do not have stairs, check the map!')
+        #set pc location
+        if direct > 0:
+            newloc = self.map['downstair']
+        else:
+            newloc = self.map['upstair']
         self.pc.setPos(*newloc)
 
         #set sprites
         if self.map.has_key('sprites'):
-            self.sprites = [sprite.Sprite.load(s) for s in self.map['sprites']]
+            self.sprites += self.map['sprites']
         self.sprites.insert(0,self.pc)
 
         #event
         self.msg("move to level:%d"%self.currentLevel)
         emit(self,MAPCHANGED)
         emit(self,PCMOVED)
-
 
     def msg(self,m):
         emit(self,ONMESSAGE,m)

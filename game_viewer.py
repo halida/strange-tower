@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/09/2009 08:05:17>
+# last-update-time: <halida 11/10/2009 11:15:12>
 # ---------------------------------
 # 
 
@@ -37,8 +37,7 @@ class GameViewer(QGraphicsView):
         #events
         connect(self.game,game.MAPCHANGED,self.updateMap)
         connect(self.game,game.PCMOVED,self.updateSprites)
-        connect(self.game,game.ITEMCHANGED,self.updateSprites)
-        connect(self.game,game.SPRITESCHANGED,self.updateSprites)
+        connect(self.game,game.SPRITECHANGED,self.updateSprites)
 
     def updateMap(self):
         self.sprites = []
@@ -48,9 +47,12 @@ class GameViewer(QGraphicsView):
         self.updateSprites()
 
     def updateSprites(self,index=0):
-        if index > 0:#0 is pc
+        #remove changed sprite
+        if 0 < index < len(self.sprites):#0 is pc
             s,g = self.sprites.pop(index)
             self.scene.removeItem(g)
+
+        #update one by one
         for i,s in enumerate(self.game.sprites):
             #check sprites exists
             spriteGraph = None
