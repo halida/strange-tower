@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/10/2009 11:42:40>
+# last-update-time: <halida 11/10/2009 16:02:01>
 # ---------------------------------
 # draw a map
 
@@ -21,7 +21,7 @@ class MapGraph(QGraphicsPixmapItem):
 
     bgcolor = QColor(Qt.black)
 
-    mapTileset = QPixmap('Graphics/Tilesets/040-Tower02.png')
+    mapTileset = QPixmap('Graphics/Tilesets/map.png')
     mapImage = QPixmap(P_SIZE*MAX_MAPX,P_SIZE*MAX_MAPY)
     
     def __init__(self,g):
@@ -54,13 +54,9 @@ class MapGraph(QGraphicsPixmapItem):
         if floor == '.':
             pos = 0,0
         elif floor == '#':
-            pos = 3,5
+            pos = 2,0
         elif floor == ' ':
             pos = 1,0
-        elif floor == '-':
-            pos = 4,9
-        elif floor in ('>','<'):
-            pos = 4,9
         else:
             raise Exception("floor error:",floor)
         return pos
