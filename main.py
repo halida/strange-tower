@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/10/2009 12:38:52>
+# last-update-time: <halida 11/10/2009 16:41:18>
 # ---------------------------------
 # 
 
@@ -52,7 +52,8 @@ class M(QMainWindow):
         addDockWidget(self,'message viewer',self.mv)
         addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
         #event
-        self.setWindowState(Qt.WindowMaximized)
+        #self.setWindowState(Qt.WindowMaximized)
+        self.resize(0,0)
         self.show()
 
     def keyPressEvent(self,event):

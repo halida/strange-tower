@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 12:45:08>
+# last-update-time: <halida 11/10/2009 16:38:40>
 # ---------------------------------
 # 
 
@@ -20,7 +20,12 @@ class GameViewer(QGraphicsView):
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
         self.setGame(g)
-        self.scale(0.8,0.8)
+        #self.scale(0.8,0.8)
+        self.setMinimumSize(640,480)
+        
+    def centerPC(self):
+        pc,pcGraph = self.sprites[0]
+        self.centerOn(pcGraph)
 
     def wheelEvent(self,event):
         """
@@ -92,10 +97,17 @@ class GameViewer(QGraphicsView):
             if (gposx/P_SIZE <> spos[0]) or (gposy/P_SIZE <> spos[1]):
                 spriteGraph.setPos(spos[0]*P_SIZE,
                                    spos[1]*P_SIZE)
+        #center pc
+        self.centerPC()
 
 class SmallMapViewer(QGraphicsView):
+    SCALE = 0.1
+    OFFSET = 10
     def __init__(self,scene):
         super(SmallMapViewer,self).__init__()
         self.scene = scene
         self.setScene(self.scene)
-        self.scale(0.1,0.1)
+        self.scale(self.SCALE,self.SCALE)
+        mins = (P_SIZE*MAX_MAPX*self.SCALE + self.OFFSET,
+                P_SIZE*MAX_MAPY*self.SCALE + self.OFFSET,)
+        self.setMinimumSize(*mins)

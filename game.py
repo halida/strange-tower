@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/10/2009 15:15:22>
+# last-update-time: <halida 11/10/2009 16:19:15>
 # ---------------------------------
 # 
 
@@ -149,7 +149,9 @@ class PCCmdPhaser():
             raise Exception("stair error:",stair)
 
     def pcDrop(self):
-        item = self.g.pcInv.pop(args)
+        i = self.g.uiwrapper.selectItem()
+        if i==None: return
+        item = self.g.pcInv.pop(i)
         s = sprite.Item(self.g.pc.getPos(),item)
         self.g.sprites.append(s)
         self.g.msg('drop item: '+s.getName())
@@ -157,7 +159,7 @@ class PCCmdPhaser():
         emit(self.g,SPRITECHANGED,len(self.g.sprites)-1)
 
     def pcPickup(self):
-        s = self.g.getSpriteByPos(*self.pc.getPos())
+        s = self.g.getSpriteByPos(*self.g.pc.getPos())
         if not s or not isinstance(s,sprite.Item):
             self.g.msg('Nothing on the groud.')
         else:
