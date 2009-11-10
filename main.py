@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/10/2009 19:38:01>
+# last-update-time: <halida 11/10/2009 21:44:56>
 # ---------------------------------
 # 
 
@@ -11,9 +11,7 @@ from items import *
 
 import game,test_module1
 
-import game_viewer
-
-import inv_viewer
+import game_viewer,inv_viewer,smallmap
 
 class UiWrapper():
     def selectItem(self):
@@ -46,10 +44,10 @@ class M(QMainWindow):
         self.gv = game_viewer.GameViewer(self.game)
         self.mv = MessageViewer(self.game)
         self.iv = inv_viewer.InvViewer(self.game)
-        #self.smv = game_viewer.SmallMapViewer(self.gv)
+        self.smv = smallmap.SmallMapViewer(self.game)
         #layout
         self.setCentralWidget(self.gv)
-        #addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
+        addDockWidget(self,'small map',self.smv,Qt.LeftDockWidgetArea)
         addDockWidget(self,'inventory viewer',self.iv)
         addDockWidget(self,'message viewer',self.mv)
         #event

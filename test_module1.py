@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/10/2009 20:50:03>
+# last-update-time: <halida 11/10/2009 21:53:55>
 # ---------------------------------
 # 
 
@@ -59,7 +59,7 @@ def setGame(game):
     game.levels.append(buttonMap)
 
     #levels
-    game.levels.append(random_map.randomBigMap())
+    #game.levels.append(random_map.randomBigMap())
     for i in range(2):
         game.levels.append(random_map.randomMap())
 

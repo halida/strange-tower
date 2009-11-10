@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 21:14:26>
+# last-update-time: <halida 11/10/2009 21:36:21>
 # ---------------------------------
 # 
 
@@ -114,21 +114,3 @@ class GameViewer(QGraphicsView):
         #center pc
         self.centerOn(pcGraph)
 
-class SmallMapViewer(QGraphicsView):
-    SIZE = (100,100)
-    SCALE = 0.1
-    OFFSET = 10
-    def __init__(self,gv):
-        super(SmallMapViewer,self).__init__()
-        self.gv = gv
-        self.setScene(self.gv.scene)
-        self.scale(self.SCALE,self.SCALE)
-        connect(self.gv.game,game.MAPCHANGED,self.updateView)
-
-    def updateView(self):
-        print 'updateview'
-        size = self.gv.game.map['size']
-        size = (int(size[0] * self.SCALE * P_SIZE + self.OFFSET),
-                int(size[1] * self.SCALE * P_SIZE + self.OFFSET),)
-        print size
-        self.setMinimumSize(*size)
