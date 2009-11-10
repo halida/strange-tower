@@ -2,16 +2,17 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/10/2009 16:19:15>
+# last-update-time: <halida 11/10/2009 17:35:14>
 # ---------------------------------
 # 
 
 from qtlib import *
+
 from items import *
+from keymap import *
+from viewlib import *
 
 import sprite,pc
-
-from keymap import *
 
 #events
 PCMOVED = 'pcMoved()'
@@ -81,7 +82,22 @@ class Game(QObject):
         emit(self,ONMESSAGE,m)
         
     def checkCollideToMap(self,x,y):
-        return self.map['map'][y][x] == '#'
+        try:
+            if x<0 or y<0: raise
+            result = (self.map['map'][y][x] == '#')
+        except:
+            self.msg('You don\'t want go out.')
+            return True
+        
+        if result:
+            self.msg('Opps,you hit a wall.')
+        return result
+
+
+    def collide(self,s):
+        return filter(lambda st:
+                          st.getPos()==s.getPos(),
+                      self.sprites,)
 
 class PCCmdPhaser():
     def __init__(self,g):
@@ -127,9 +143,12 @@ class PCCmdPhaser():
                   dy + self.g.pc.py)
         if not self.g.checkCollideToMap(*newloc):
             self.g.pc.move(dx,dy)
+            #check whats on the ground
+            sprites = self.g.collide(self.g.pc)
+            for s in sprites:
+                if s!=self.g.pc:
+                    emit(self.g,ONMESSAGE,s.getDesc())
             emit(self.g,PCMOVED)
-        else:
-            self.g.msg('Opps,you hit a wall.')
             
     def pcSearch(self):
         self.g.msg('Searching...')            

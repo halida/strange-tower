@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 08:55:52>
-# last-update-time: <halida 11/10/2009 11:07:52>
+# last-update-time: <halida 11/10/2009 16:49:23>
 # ---------------------------------
 # 
 
@@ -136,7 +136,7 @@ def randomMap(upStair=True,downStair=True):
 
 def createMap(map,upP=None,downP=None):
     if type(map) == type(""):
-        map = map.split("\n")
+        map = map.split("\n")[1:]
     sprites = []
     if upP:
         sprites.append(sprite.Stair(upP,upstair=True))

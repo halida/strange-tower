@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/10/2009 12:00:29>
+# last-update-time: <halida 11/10/2009 17:16:08>
 # ---------------------------------
 # 
 
@@ -25,8 +25,6 @@ class Sprite(object):
         self.px = x
         self.py = y
 
-
-
 class Item(Sprite):
     view = V_ITEM
     def __init__(self,pos,itemdata):
@@ -35,6 +33,8 @@ class Item(Sprite):
         self.setPos(*pos)
     def getName(self):
         return self.itemdata['name']
+    def getDesc(self):
+        return "%s lays here." % self.getName()
 
 class Stair(Sprite):
     def __init__(self,pos,upstair=False,downstair=False):
@@ -46,3 +46,14 @@ class Stair(Sprite):
             self.view = V_UPSTAIR
         elif self.downstair:
             self.view = V_DOWNSTAIR
+    def getDesc(self):
+        return "a staircase %s."% 'up' if self.upstair else 'down'
+
+class Sign(Sprite):
+    view = V_SIGN
+    def __init__(self,text,pos):
+        super(Sign,self).__init__()
+        self.text = text
+        self.setPos(*pos)
+    def getDesc(self):
+        return "a sign: %s" % self.text

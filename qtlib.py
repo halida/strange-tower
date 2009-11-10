@@ -2,14 +2,17 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/10/24 07:54:49>
-# last-update-time: <halida 11/08/2009 12:52:53>
+# last-update-time: <halida 11/10/2009 17:37:59>
 # ---------------------------------
 # 
 
 import os,sys
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4 import uic
+try:
+    from PyQt4.QtCore import *
+    from PyQt4.QtGui import *
+    from PyQt4 import uic
+except:
+    raise Exception('Sorry, you need install PyQt4.')
 
 app = QApplication(sys.argv)
 

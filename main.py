@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/10/2009 16:41:18>
+# last-update-time: <halida 11/10/2009 17:18:49>
 # ---------------------------------
 # 
 
@@ -30,6 +30,7 @@ class MessageViewer(QListWidget):
         super(MessageViewer,self).__init__()
         self.game = g
         connect(self.game,game.ONMESSAGE,self.showMsg)
+        self.setMinimumSize(300,10)
         
     def showMsg(self,msg):
         self.insertItem(0,msg)
@@ -48,9 +49,9 @@ class M(QMainWindow):
         self.smv = game_viewer.SmallMapViewer(self.gv.scene)
         #layout
         self.setCentralWidget(self.gv)
+        addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
         addDockWidget(self,'inventory viewer',self.iv)
         addDockWidget(self,'message viewer',self.mv)
-        addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
         #event
         #self.setWindowState(Qt.WindowMaximized)
         self.resize(0,0)
