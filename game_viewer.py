@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 12:30:39>
+# last-update-time: <halida 11/10/2009 12:37:50>
 # ---------------------------------
 # 
 
@@ -94,3 +94,9 @@ class GameViewer(QGraphicsView):
                 spriteGraph.setPos(spos[0]*P_SIZE,
                                    spos[1]*P_SIZE)
 
+class SmallMapViewer(QGraphicsView):
+    def __init__(self,scene):
+        super(SmallMapViewer,self).__init__()
+        self.scene = scene
+        self.setScene(self.scene)
+        self.scale(0.1,0.1)
