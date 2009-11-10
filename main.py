@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/10/2009 17:18:49>
+# last-update-time: <halida 11/10/2009 19:38:01>
 # ---------------------------------
 # 
 
@@ -46,10 +46,10 @@ class M(QMainWindow):
         self.gv = game_viewer.GameViewer(self.game)
         self.mv = MessageViewer(self.game)
         self.iv = inv_viewer.InvViewer(self.game)
-        self.smv = game_viewer.SmallMapViewer(self.gv.scene)
+        #self.smv = game_viewer.SmallMapViewer(self.gv)
         #layout
         self.setCentralWidget(self.gv)
-        addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
+        #addDockWidget(self,'small map',self.smv,Qt.RightDockWidgetArea)
         addDockWidget(self,'inventory viewer',self.iv)
         addDockWidget(self,'message viewer',self.mv)
         #event

@@ -2,20 +2,16 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 08:55:52>
-# last-update-time: <halida 11/10/2009 16:49:23>
+# last-update-time: <halida 11/10/2009 20:34:12>
 # ---------------------------------
 # 
 
 from viewlib import *
 
 import random
-
 import sprite
 
 randint = random.randint
-
-ROOM_NUMBER = 12
-ROOM_SIZE = 3,10
 
 def isOverlapping(ap,al,bp,bl):
     """
@@ -40,7 +36,18 @@ def roomConfict(r1,r2):
             return True
     return False
 
-def randomMap(upStair=True,downStair=True):
+def randomBigMap(**kw):
+    kw['ROOM_SIZE']=(4,20)
+    kw['ROOM_NUMBER']=50
+    kw['MAX_MAPX']=500
+    kw['MAX_MAPY']=500
+    return randomMap(**kw)
+
+def randomMap(upStair=True,downStair=True,
+              ROOM_SIZE=(3,10),
+              ROOM_NUMBER=12,
+              MAX_MAPX=MAX_MAPX,
+              MAX_MAPY=MAX_MAPY,):
     #create room
     rooms = []
     for i in range(ROOM_NUMBER):
@@ -135,14 +142,21 @@ def randomMap(upStair=True,downStair=True):
     return createMap(map,upP,downP)
 
 def createMap(map,upP=None,downP=None):
+    #if map not random, preprocess
     if type(map) == type(""):
-        map = map.split("\n")[1:]
+        map = map.strip()
+        map = map.split("\n")
     sprites = []
+
+    #caculate map size
+    size = len(map[0]),len(map)
+    
+    #caculate stairs sprite
     if upP:
         sprites.append(sprite.Stair(upP,upstair=True))
     if downP:
         sprites.append(sprite.Stair(downP,downstair=True))
-    return dict(map=map,
+    return dict(map=map,size=size,
                 upstair=upP,downstair=downP,
                 sprites=sprites)
     

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/10/2009 17:16:08>
+# last-update-time: <halida 11/10/2009 20:32:20>
 # ---------------------------------
 # 
 
@@ -47,7 +47,7 @@ class Stair(Sprite):
         elif self.downstair:
             self.view = V_DOWNSTAIR
     def getDesc(self):
-        return "a staircase %s."% 'up' if self.upstair else 'down'
+        return "a staircase %s."% ('up' if self.upstair else 'down')
 
 class Sign(Sprite):
     view = V_SIGN

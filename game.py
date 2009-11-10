@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/10/2009 17:35:14>
+# last-update-time: <halida 11/10/2009 20:53:51>
 # ---------------------------------
 # 
 
@@ -30,13 +30,11 @@ class Game(QObject):
         self.map = None
         self.sprites = []
         self.pc = pc.PC()
-        self.sprites.append(self.pc)
         self.pcInv = []
         self.evalKeymap = self.pcCmdPhaser.evalKeymap
 
     def loadModule(self,module):
         module.setGame(self)
-        self.map = self.levels[self.currentLevel]
 
     def getSpriteByPos(self,x,y):
         for s in self.sprites:
@@ -76,7 +74,6 @@ class Game(QObject):
         #event
         self.msg("move to level:%d"%self.currentLevel)
         emit(self,MAPCHANGED)
-        emit(self,PCMOVED)
 
     def msg(self,m):
         emit(self,ONMESSAGE,m)

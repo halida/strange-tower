@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 16:38:40>
+# last-update-time: <halida 11/10/2009 21:14:26>
 # ---------------------------------
 # 
 
@@ -19,14 +19,15 @@ class GameViewer(QGraphicsView):
         self.setRenderHint(QPainter.Antialiasing)
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
-        self.setGame(g)
-        #self.scale(0.8,0.8)
+        self.setBackgroundBrush(QBrush(QColor(240,240,240)))
         self.setMinimumSize(640,480)
-        
-    def centerPC(self):
-        pc,pcGraph = self.sprites[0]
-        self.centerOn(pcGraph)
+        self.mapGraphCreater = map_graph.MapGraphCreater(g)
 
+        self.setGame(g)
+
+        #self.scale(0.8,0.8)
+
+        
     def wheelEvent(self,event):
         """
         use mouse wheel to scale the screen.
@@ -41,15 +42,21 @@ class GameViewer(QGraphicsView):
 
         #events
         connect(self.game,game.MAPCHANGED,self.updateMap)
-        connect(self.game,game.PCMOVED,self.updateSprites)
+        connect(self.game,game.PCMOVED,self.movePC)
         connect(self.game,game.SPRITECHANGED,self.updateSprites)
 
     def updateMap(self):
         self.sprites = []
         self.scene.clear()
-        self.mapGraph = map_graph.MapGraph(self.game)
-        self.scene.addItem(self.mapGraph)
+        self.mapGraphCreater.graph=None
+        self.mapGraphCreater.updateMap()
+        self.scene.addItem(self.mapGraphCreater.graph)
         self.updateSprites()
+        self.movePC()
+        #change map not center on pc,
+        #but add one movePC will fix this,
+        #I don't know why
+        self.movePC()
 
     def updateSprites(self,index=0):
         #remove changed sprite
@@ -97,17 +104,31 @@ class GameViewer(QGraphicsView):
             if (gposx/P_SIZE <> spos[0]) or (gposy/P_SIZE <> spos[1]):
                 spriteGraph.setPos(spos[0]*P_SIZE,
                                    spos[1]*P_SIZE)
+
+    def movePC(self):
+        x,y = self.game.pc.getPos()
+        pos = x*P_SIZE,y*P_SIZE
+        pc,pcGraph = self.sprites[0]
+        pcGraph.setPos(*pos)
+
         #center pc
-        self.centerPC()
+        self.centerOn(pcGraph)
 
 class SmallMapViewer(QGraphicsView):
+    SIZE = (100,100)
     SCALE = 0.1
     OFFSET = 10
-    def __init__(self,scene):
+    def __init__(self,gv):
         super(SmallMapViewer,self).__init__()
-        self.scene = scene
-        self.setScene(self.scene)
+        self.gv = gv
+        self.setScene(self.gv.scene)
         self.scale(self.SCALE,self.SCALE)
-        mins = (P_SIZE*MAX_MAPX*self.SCALE + self.OFFSET,
-                P_SIZE*MAX_MAPY*self.SCALE + self.OFFSET,)
-        self.setMinimumSize(*mins)
+        connect(self.gv.game,game.MAPCHANGED,self.updateView)
+
+    def updateView(self):
+        print 'updateview'
+        size = self.gv.game.map['size']
+        size = (int(size[0] * self.SCALE * P_SIZE + self.OFFSET),
+                int(size[1] * self.SCALE * P_SIZE + self.OFFSET),)
+        print size
+        self.setMinimumSize(*size)
