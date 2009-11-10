@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 11:15:12>
+# last-update-time: <halida 11/10/2009 12:30:39>
 # ---------------------------------
 # 
 
@@ -63,10 +63,25 @@ class GameViewer(QGraphicsView):
 
             #create sprite graph
             if not spriteGraph:
-                spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
+                if hasattr(s,'view'):
+                    spriteGraph = QGraphicsPixmapItem()
+                    pixmap = QPixmap(s.view)
+                    if hasattr(s,'size'):
+                        pos = (
+                            0,
+                            -(s.size[1]-1)*P_SIZE)
+                        spriteGraph.setOffset(*pos)
+                        pixmap = pixmap.copy(0,0,
+                                             s.size[0]*P_SIZE,
+                                             s.size[1]*P_SIZE)
+                    spriteGraph.setPixmap(pixmap)
+                else:
+                    spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
+                    spriteGraph.setBrush(QColor(Qt.red))
+
                 spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
-                spriteGraph.setZValue(1)
-                spriteGraph.setBrush(QColor(Qt.red))
+                z = 10 if s==self.game.pc else 0
+                spriteGraph.setZValue(z)
                 self.scene.addItem(spriteGraph)
                 self.sprites.insert(i, (s,spriteGraph) )
                 #print "adding:",sprite

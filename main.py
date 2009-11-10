@@ -2,14 +2,14 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/08/2009 21:42:55>
+# last-update-time: <halida 11/10/2009 11:33:51>
 # ---------------------------------
 # 
 
 from qtlib import *
 from items import *
 
-import game,test_map1,test_module1
+import game,test_module1
 
 import game_viewer
 

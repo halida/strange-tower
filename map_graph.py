@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/08/2009 21:29:22>
+# last-update-time: <halida 11/10/2009 11:42:40>
 # ---------------------------------
 # draw a map
 
@@ -21,7 +21,7 @@ class MapGraph(QGraphicsPixmapItem):
 
     bgcolor = QColor(Qt.black)
 
-    mapTileset = QPixmap('data/tileset/map.png')
+    mapTileset = QPixmap('Graphics/Tilesets/040-Tower02.png')
     mapImage = QPixmap(P_SIZE*MAX_MAPX,P_SIZE*MAX_MAPY)
     
     def __init__(self,g):
