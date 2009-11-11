@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/11/2009 11:25:01>
+# last-update-time: <halida 11/11/2009 12:28:28>
 # ---------------------------------
 # 
 
@@ -27,6 +27,7 @@ SPRITE_DIE = 'spritedie'
 SPRITE_CREATE = 'spritecreate'
 
 class Game(QObject):
+    REAL_TIME = False
     def __init__(self,uiwrapper):
         super(Game,self).__init__()
         self.uiwrapper = uiwrapper
@@ -42,13 +43,12 @@ class Game(QObject):
 
     def loadModule(self,module):
         module.setGame(self)
-        self.running()
+        if self.REAL_TIME:self.running()
 
     def running(self):
         self.timer = QTimer()
-        #self.timer.setInterval(1000)
         connect(self.timer,"timeout()",self.step)
-        self.timer.start(1000)
+        self.timer.start(800)
 
     def getSpriteByPos(self,x,y):
         for s in self.sprites:
@@ -106,7 +106,8 @@ class Game(QObject):
 
     def step(self):
         #print "stepping.."
-        self.pcCmdPhaser.phase()
+        if self.REAL_TIME:
+            self.pcCmdPhaser.phase()
 
         #moving
         sprites = filter(lambda s:isinstance(s,sprite.LivingSprite),
@@ -198,11 +199,16 @@ class PCCmdPhaser():
         except:
             return
         self.cmd = cmd
+        if not self.g.REAL_TIME:
+            self.phase()
+            self.g.step()
 
     def phase(self):
         if not self.cmd: return
+        cmd = self.cmd
+        self.cmd = None
         try:
-            fun = self.mapper[self.cmd]
+            fun = self.mapper[cmd]
         except:
             raise Exception("this cmd not defined:",cmd)
         fun()

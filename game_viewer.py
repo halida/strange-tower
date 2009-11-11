@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/11/2009 11:26:35>
+# last-update-time: <halida 11/11/2009 12:33:28>
 # ---------------------------------
 # 
 
@@ -31,7 +31,7 @@ class GameViewer(QGraphicsView):
         #connect(self.timer,"frameChanged(int)",
         #        lambda i:self.game.msg(str(self.sprites[3][1].pos())))
 
-        self.setBackgroundBrush(QBrush(QColor(240,240,240)))
+        self.setBackgroundBrush(QBrush(QColor(250,250,250)))
         self.setMinimumSize(640,480)
         self.mapGraphCreater = map_graph.MapGraphCreater(g)
 
@@ -128,8 +128,8 @@ class GameViewer(QGraphicsView):
             else:
                 raise Exception("type error:",type)
             
-        self.game.keyEnable = False
-        self.timer.start()
+        if self.timer.state() != QTimeLine.Running:
+            self.timer.start()
 
     def finishStep(self):
         self.timer.stop()
@@ -145,7 +145,6 @@ class GameViewer(QGraphicsView):
 
         self.updates = []
         self.centerPC()
-        self.game.keyEnable = True
 
     def updateSprite(self,type,index):
         #buffer updates
