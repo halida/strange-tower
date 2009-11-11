@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/11/2009 12:28:28>
+# last-update-time: <halida 11/11/2009 12:54:44>
 # ---------------------------------
 # 
 
@@ -38,8 +38,7 @@ class Game(QObject):
         self.sprites = []
         self.pc = pc.PC()
         self.pcInv = []
-        self.keyEnable = True
-        self.bufferKey = None
+        self.inputEnable = True
 
     def loadModule(self,module):
         module.setGame(self)
@@ -200,6 +199,7 @@ class PCCmdPhaser():
             return
         self.cmd = cmd
         if not self.g.REAL_TIME:
+            if not self.g.inputEnable: return
             self.phase()
             self.g.step()
 

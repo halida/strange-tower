@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/11/2009 11:36:23>
+# last-update-time: <halida 11/11/2009 13:02:43>
 # ---------------------------------
 # 
 
@@ -11,14 +11,14 @@ from items import *
 import random_map,sprite
 
 map1 = """
+###################################.....
+###################################.....
+###################################.....
+################################## .....
+###################################.....
      ...................................
      ...................................
      ...................................
-###################################.....
-###################################.....
-###################################.....
-##################################......
-###################################.....
 """
 
 map2 = """
@@ -54,9 +54,9 @@ def setGame(game):
     game.levels = []
 
     #button
-    buttonMap = random_map.createMap(map=map1,upP=(34,6))
-    buttonMap['sprites'].append(sprite.Sign(INC,(35,6)))
-    buttonMap['sprites'].append(sprite.Foe((5,2),))
+    buttonMap = random_map.createMap(map=map1,upP=(34,3))
+    buttonMap['sprites'].append(sprite.Sign(INC,(35,3)))
+    buttonMap['sprites'].append(sprite.Foe((5,6),))
     game.levels.append(buttonMap)
 
     #levels
@@ -71,4 +71,4 @@ def setGame(game):
     
     #init
     game.changeMap(level=0)
-    game.pc.setPos(2,2)
+    game.pc.setPos(2,6)

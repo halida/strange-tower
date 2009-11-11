@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/11/2009 07:44:32>
+# last-update-time: <halida 11/11/2009 13:04:26>
 # ---------------------------------
 # draw a map
 
@@ -88,7 +88,7 @@ class MapGraphCreater():
         elif floor == '#':
             pos = 2,0
         elif floor == ' ':
-            pos = 1,0
+            pos = 3,0
         else:
             raise Exception("floor error:",floor)
         return pos

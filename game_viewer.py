@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/11/2009 12:33:28>
+# last-update-time: <halida 11/11/2009 12:55:43>
 # ---------------------------------
 # 
 
@@ -14,6 +14,7 @@ import game,map_graph
 
 class GameViewer(QGraphicsView):
     FRAMERATE = 8
+    STEP_TIME = 500
     def __init__(self,g):
         super(GameViewer,self).__init__()
         self.sprites = {}
@@ -25,7 +26,7 @@ class GameViewer(QGraphicsView):
         self.setScene(self.scene)
 
         #timer
-        self.timer = QTimeLine(500)
+        self.timer = QTimeLine(self.STEP_TIME)
         self.timer.setFrameRange(1,self.FRAMERATE)
         connect(self.timer,"finished()",self.finishStep)
         #connect(self.timer,"frameChanged(int)",
@@ -101,7 +102,6 @@ class GameViewer(QGraphicsView):
             if type == game.SPRITE_CREATE:
                 self.createSprite(index,self.game.sprites[index])
             elif type == game.SPRITE_DIE:
-                print index
                 s,g = self.sprites.pop(index)
                 self.scene.removeItem(g)
                 #todo
@@ -127,7 +127,8 @@ class GameViewer(QGraphicsView):
                 self.animations.append(a)
             else:
                 raise Exception("type error:",type)
-            
+
+        self.game.inputEnable=False
         if self.timer.state() != QTimeLine.Running:
             self.timer.start()
 
@@ -145,6 +146,7 @@ class GameViewer(QGraphicsView):
 
         self.updates = []
         self.centerPC()
+        self.game.inputEnable=True
 
     def updateSprite(self,type,index):
         #buffer updates
