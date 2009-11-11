@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/10/24 07:54:49>
-# last-update-time: <halida 11/10/2009 17:37:59>
+# last-update-time: <halida 11/11/2009 08:27:33>
 # ---------------------------------
 # 
 
@@ -13,6 +13,9 @@ try:
     from PyQt4 import uic
 except:
     raise Exception('Sorry, you need install PyQt4.')
+
+import random
+randint = random.randint
 
 app = QApplication(sys.argv)
 

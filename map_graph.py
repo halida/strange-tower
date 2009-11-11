@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/10/2009 21:18:39>
+# last-update-time: <halida 11/11/2009 07:44:32>
 # ---------------------------------
 # draw a map
 
@@ -15,7 +15,7 @@ import game
 class MapGraphCreater():
     EDGE = 10
     SW,SH = SIZE = 40,40
-    bgcolor = QColor(Qt.black)
+    bgcolor = QColor(240,240,240)
     mapTileset = QPixmap('Graphics/Tilesets/map.png')
 
     rect = QRectF(0,0,

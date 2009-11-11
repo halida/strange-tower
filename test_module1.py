@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/10/2009 21:53:55>
+# last-update-time: <halida 11/11/2009 08:35:18>
 # ---------------------------------
 # 
 
@@ -56,6 +56,7 @@ def setGame(game):
     #button
     buttonMap = random_map.createMap(map=map1,upP=(34,6))
     buttonMap['sprites'].append(sprite.Sign(INC,(35,6)))
+    buttonMap['sprites'].append(sprite.Foe((5,2),))
     game.levels.append(buttonMap)
 
     #levels

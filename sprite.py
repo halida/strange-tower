@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/10/2009 20:32:20>
+# last-update-time: <halida 11/11/2009 08:37:44>
 # ---------------------------------
 # 
 
@@ -11,7 +11,6 @@ from view_to_pic import *
 class Sprite(object):
     def __init__(self,pos=(0,0)):
         self.setPos(*pos)
-
     # movable
     def setPos(self,x,y):
         self.px = x
@@ -57,3 +56,36 @@ class Sign(Sprite):
         self.setPos(*pos)
     def getDesc(self):
         return "a sign: %s" % self.text
+
+class LivingSprite(Sprite):
+    moving = None
+    def __init__(self):
+        super(LivingSprite,self).__init__()
+        self.hp = 10
+        self.atk = (0,0); self.hit = 0
+        self.abs = 0    ; self.ac  = 0
+        self.toLoc = None
+    def moveToUser(self,g):
+        px,py = pp = g.pc.getPos()
+        sx,sy = sp = self.getPos()
+        tx,ty = cmp(px,sx),cmp(py,sy)
+        self.toLoc = tx+sx,ty+sy
+
+class Foe(LivingSprite):
+    view = V_FOE
+    size = (1,2)
+    moving = LivingSprite.moveToUser
+    name = "foe"
+    def __init__(self,pos,hp=10,
+                 atk=(1,2),hit=10,
+                 abs=1,ac=5):
+        super(Foe,self).__init__()
+        self.setPos(*pos)
+        self.hp = hp
+        self.atk = atk
+        self.hit = hit
+        self.abs = abs
+        self.ac = ac
+    def getDesc(self):
+        return "foe."
+

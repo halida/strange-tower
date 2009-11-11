@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/10/2009 20:53:51>
+# last-update-time: <halida 11/11/2009 08:49:33>
 # ---------------------------------
 # 
 
@@ -90,11 +90,63 @@ class Game(QObject):
             self.msg('Opps,you hit a wall.')
         return result
 
+    def step(self):
+        sprites = filter(lambda s:isinstance(s,sprite.LivingSprite),
+                         self.sprites)
+        #moving
+        for s in sprites:
+            if s.moving: s.moving(self)
 
-    def collide(self,s):
+        sprites = filter(lambda s:s.toLoc!=None,
+                         sprites)
+
+        #check collide
+        for s in sprites:
+            if not self.checkCollideToMap(*s.toLoc):
+                torgets = self.collide(s.toLoc)
+                torgets = filter(lambda s:isinstance(s,sprite.LivingSprite),
+                                 torgets)
+                if not torgets:#no collide
+                    s.moveTo(*s.toLoc)
+                    s.toLoc = None
+                    emit(self,SPRITECHANGED,self.sprites.index(s))
+                else:#collide to sprite
+                    for t in torgets:
+                        if t!=s: self.atk(s,t)
+
+            #if pc moving
+            if s == self.pc:
+                #check whats on the ground
+                sprites = self.collide(self.pc.getPos())
+                for s in sprites:
+                    if s!=self.pc:
+                        emit(self,ONMESSAGE,s.getDesc())
+                emit(self,PCMOVED)
+
+    def collide(self,pos):
         return filter(lambda st:
-                          st.getPos()==s.getPos(),
+                          st.getPos()==pos,
                       self.sprites,)
+
+    def atk(self,s,d):
+        #check if hit
+        if randint(1,20) > s.hit - d.ac:
+            self.msg('%s not hit.'%d.name)
+            return
+        #hit
+        hit = randint(*s.atk) - d.abs
+        if hit <0: hit = 0
+        d.hp -= hit
+        self.msg("%s take %d damage from %s."%(d.name,hit,s.name))
+        #die
+        if d.hp <= 0:
+            self.msg("%s die."%d.name)
+            if d == self.pc:
+                self.step = None#end game
+            else:
+                i = self.sprites.index(d)
+                self.sprites.remove(d)
+                emit(self,SPRITECHANGED,i)
 
 class PCCmdPhaser():
     def __init__(self,g):
@@ -127,6 +179,7 @@ class PCCmdPhaser():
         except:
             return
         self.phase(cmd)
+        self.g.step()
 
     def phase(self,cmd):
         try:
@@ -138,14 +191,7 @@ class PCCmdPhaser():
     def pcMove(self,dx,dy):
         newloc = (dx + self.g.pc.px,
                   dy + self.g.pc.py)
-        if not self.g.checkCollideToMap(*newloc):
-            self.g.pc.move(dx,dy)
-            #check whats on the ground
-            sprites = self.g.collide(self.g.pc)
-            for s in sprites:
-                if s!=self.g.pc:
-                    emit(self.g,ONMESSAGE,s.getDesc())
-            emit(self.g,PCMOVED)
+        self.g.pc.toLoc = newloc
             
     def pcSearch(self):
         self.g.msg('Searching...')            
