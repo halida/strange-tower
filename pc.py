@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:21:16>
-# last-update-time: <halida 11/11/2009 08:42:23>
+# last-update-time: <halida 11/11/2009 10:12:06>
 # ---------------------------------
 # 
 
@@ -15,7 +15,7 @@ class PC(LivingSprite):
     def __init__(self):
         super(PC,self).__init__()
         self.hp = 100
-        self.atk = (1,8); self.hit = 10
+        self.atk = (1,10); self.hit = 20
         self.abs = 1    ; self.ac  = 5
 
     def getDesc(self):

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/10/2009 21:36:21>
+# last-update-time: <halida 11/11/2009 11:26:35>
 # ---------------------------------
 # 
 
@@ -13,20 +13,29 @@ from viewlib import *
 import game,map_graph
 
 class GameViewer(QGraphicsView):
+    FRAMERATE = 8
     def __init__(self,g):
         super(GameViewer,self).__init__()
         self.sprites = {}
+        self.updates = []
+        self.animations = []
+
         self.setRenderHint(QPainter.Antialiasing)
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
+
+        #timer
+        self.timer = QTimeLine(500)
+        self.timer.setFrameRange(1,self.FRAMERATE)
+        connect(self.timer,"finished()",self.finishStep)
+        #connect(self.timer,"frameChanged(int)",
+        #        lambda i:self.game.msg(str(self.sprites[3][1].pos())))
+
         self.setBackgroundBrush(QBrush(QColor(240,240,240)))
         self.setMinimumSize(640,480)
         self.mapGraphCreater = map_graph.MapGraphCreater(g)
 
         self.setGame(g)
-
-        #self.scale(0.8,0.8)
-
         
     def wheelEvent(self,event):
         """
@@ -37,80 +46,114 @@ class GameViewer(QGraphicsView):
 
     def setGame(self,g):
         self.game = g
-
         self.updateMap()
 
         #events
         connect(self.game,game.MAPCHANGED,self.updateMap)
-        connect(self.game,game.PCMOVED,self.movePC)
-        connect(self.game,game.SPRITECHANGED,self.updateSprites)
+        connect(self.game,game.STEPED,self.step)
+        connect(self.game,game.SPRITECHANGED,self.updateSprite)
 
     def updateMap(self):
+        print "map updating.."
         self.sprites = []
         self.scene.clear()
         self.mapGraphCreater.graph=None
         self.mapGraphCreater.updateMap()
         self.scene.addItem(self.mapGraphCreater.graph)
-        self.updateSprites()
-        self.movePC()
-        #change map not center on pc,
-        #but add one movePC will fix this,
-        #I don't know why
-        self.movePC()
 
-    def updateSprites(self,index=0):
-        #remove changed sprite
-        if 0 < index < len(self.sprites):#0 is pc
-            s,g = self.sprites.pop(index)
-            self.scene.removeItem(g)
-
-        #update one by one
+        #create sprites
         for i,s in enumerate(self.game.sprites):
-            #check sprites exists
-            spriteGraph = None
-            if i<len(self.sprites):
-                sprite , spriteGraph = self.sprites[i]
-                if sprite != s:
-                    spriteGraph = None
+            self.createSprite(i,s)
 
-            #create sprite graph
-            if not spriteGraph:
-                if hasattr(s,'view'):
-                    spriteGraph = QGraphicsPixmapItem()
-                    pixmap = QPixmap(s.view)
-                    if hasattr(s,'size'):
-                        pos = (
-                            0,
-                            -(s.size[1]-1)*P_SIZE)
-                        spriteGraph.setOffset(*pos)
-                        pixmap = pixmap.copy(0,0,
-                                             s.size[0]*P_SIZE,
-                                             s.size[1]*P_SIZE)
-                    spriteGraph.setPixmap(pixmap)
-                else:
-                    spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
-                    spriteGraph.setBrush(QColor(Qt.red))
-                #spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
-                z = 10 if s==self.game.pc else 1
-                spriteGraph.setZValue(z)
-                self.scene.addItem(spriteGraph)
-                self.sprites.insert(i, (s,spriteGraph) )
-                #print "adding:",sprite
+        self.centerPC()
 
-            #check pos
-            spos = s.getPos()
-            gpos = spriteGraph.pos()
-            gposx,gposy = gpos.x(),gpos.y()
-            if (gposx/P_SIZE <> spos[0]) or (gposy/P_SIZE <> spos[1]):
-                spriteGraph.setPos(spos[0]*P_SIZE,
-                                   spos[1]*P_SIZE)
+    def createSprite(self,i,s):
+        if hasattr(s,'view'):#sprite has view
+            spriteGraph = QGraphicsPixmapItem()
+            pixmap = QPixmap(s.view)
+            if hasattr(s,'size'):
+                pos = (
+                    0,
+                    -(s.size[1]-1)*P_SIZE)
+                spriteGraph.setOffset(*pos)
+                pixmap = pixmap.copy(0,0,
+                                     s.size[0]*P_SIZE,
+                                     s.size[1]*P_SIZE)
+            spriteGraph.setPixmap(pixmap)
+        else:#sprite have no view
+            spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
+            spriteGraph.setBrush(QColor(Qt.red))
+        #spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
+        #sprite pos
+        z = 10 if s==self.game.pc else 1
+        spriteGraph.setZValue(z)
+        spriteGraph.setPos(s.px*P_SIZE,s.py*P_SIZE)
+        #finish
+        self.scene.addItem(spriteGraph)
+        self.sprites.insert(i, (s,spriteGraph) )
+        #print "adding:",s
 
-    def movePC(self):
-        x,y = self.game.pc.getPos()
-        pos = x*P_SIZE,y*P_SIZE
+    def step(self):
+        #init
+        
+        #set animations
+        for type,index in self.updates:
+            if type == game.SPRITE_CREATE:
+                self.createSprite(index,self.game.sprites[index])
+            elif type == game.SPRITE_DIE:
+                print index
+                s,g = self.sprites.pop(index)
+                self.scene.removeItem(g)
+                #todo
+            elif type == game.SPRITE_MOVE:
+                s,g = self.sprites[index]
+                oldp = ox,oy = g.x(),g.y()
+                newp = nx,ny = s.px*P_SIZE,s.py*P_SIZE
+                sx = (nx - ox) / self.FRAMERATE
+                sy = (ny - oy) / self.FRAMERATE
+                #g.setPos(s.px*P_SIZE,s.py*P_SIZE)
+
+                a = QGraphicsItemAnimation()
+                a.setItem(g)
+                a.setTimeLine(self.timer)
+                #set move
+                step = self.FRAMERATE
+                #print "set moving:",index,ox,oy,nx,ny
+                for i in range(step):
+                    pos = (ox + sx * i,
+                           oy + sy * i,)
+                    a.setPosAt(i/float(step),QPointF(*pos))
+                    #print s.name,pos
+                self.animations.append(a)
+            else:
+                raise Exception("type error:",type)
+            
+        self.game.keyEnable = False
+        self.timer.start()
+
+    def finishStep(self):
+        self.timer.stop()
+        self.timer.setCurrentTime(0)
+        self.animations = []
+
+        #print 'finishing step..',self.updates
+        for type,index in self.updates:
+            if type == game.SPRITE_MOVE:
+                s,g = self.sprites[index]
+                #print "seting new pos:",index,s.px*P_SIZE,s.py*P_SIZE
+                g.setPos(s.px*P_SIZE,s.py*P_SIZE)
+
+        self.updates = []
+        self.centerPC()
+        self.game.keyEnable = True
+
+    def updateSprite(self,type,index):
+        #buffer updates
+        #print "buffering:",type,index
+        self.updates.append( (type,index) )
+
+    def centerPC(self):
         pc,pcGraph = self.sprites[0]
-        pcGraph.setPos(*pos)
-
         #center pc
         self.centerOn(pcGraph)
 

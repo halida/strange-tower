@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/11/2009 08:49:33>
+# last-update-time: <halida 11/11/2009 11:25:01>
 # ---------------------------------
 # 
 
@@ -19,7 +19,12 @@ PCMOVED = 'pcMoved()'
 MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
 INVCHANGED = 'invChanged()'
-SPRITECHANGED = 'spriteChanged(int)'
+SPRITECHANGED = 'spriteChanged(QString,int)'
+STEPED = 'steped()'
+
+SPRITE_MOVE = 'spritemove'
+SPRITE_DIE = 'spritedie'
+SPRITE_CREATE = 'spritecreate'
 
 class Game(QObject):
     def __init__(self,uiwrapper):
@@ -27,14 +32,23 @@ class Game(QObject):
         self.uiwrapper = uiwrapper
         uiwrapper.game = self
         self.pcCmdPhaser = PCCmdPhaser(self)
+        self.evalKeymap = self.pcCmdPhaser.evalKeymap
         self.map = None
         self.sprites = []
         self.pc = pc.PC()
         self.pcInv = []
-        self.evalKeymap = self.pcCmdPhaser.evalKeymap
+        self.keyEnable = True
+        self.bufferKey = None
 
     def loadModule(self,module):
         module.setGame(self)
+        self.running()
+
+    def running(self):
+        self.timer = QTimer()
+        #self.timer.setInterval(1000)
+        connect(self.timer,"timeout()",self.step)
+        self.timer.start(1000)
 
     def getSpriteByPos(self,x,y):
         for s in self.sprites:
@@ -91,12 +105,14 @@ class Game(QObject):
         return result
 
     def step(self):
+        #print "stepping.."
+        self.pcCmdPhaser.phase()
+
+        #moving
         sprites = filter(lambda s:isinstance(s,sprite.LivingSprite),
                          self.sprites)
-        #moving
         for s in sprites:
             if s.moving: s.moving(self)
-
         sprites = filter(lambda s:s.toLoc!=None,
                          sprites)
 
@@ -109,7 +125,7 @@ class Game(QObject):
                 if not torgets:#no collide
                     s.moveTo(*s.toLoc)
                     s.toLoc = None
-                    emit(self,SPRITECHANGED,self.sprites.index(s))
+                    emit(self,SPRITECHANGED,SPRITE_MOVE,self.sprites.index(s))
                 else:#collide to sprite
                     for t in torgets:
                         if t!=s: self.atk(s,t)
@@ -122,6 +138,8 @@ class Game(QObject):
                     if s!=self.pc:
                         emit(self,ONMESSAGE,s.getDesc())
                 emit(self,PCMOVED)
+        emit(self,STEPED)
+        #print "stepped"
 
     def collide(self,pos):
         return filter(lambda st:
@@ -131,7 +149,7 @@ class Game(QObject):
     def atk(self,s,d):
         #check if hit
         if randint(1,20) > s.hit - d.ac:
-            self.msg('%s not hit.'%d.name)
+            self.msg('%s not hit.'%s.name)
             return
         #hit
         hit = randint(*s.atk) - d.abs
@@ -146,11 +164,12 @@ class Game(QObject):
             else:
                 i = self.sprites.index(d)
                 self.sprites.remove(d)
-                emit(self,SPRITECHANGED,i)
+                emit(self,SPRITECHANGED,SPRITE_DIE,i)
 
 class PCCmdPhaser():
     def __init__(self,g):
         self.g = g
+        self.cmd = None
         self.mapper = {
             PC_SEARCH                 : self.pcSearch,
             
@@ -178,12 +197,12 @@ class PCCmdPhaser():
             cmd = key2func[key]
         except:
             return
-        self.phase(cmd)
-        self.g.step()
+        self.cmd = cmd
 
-    def phase(self,cmd):
+    def phase(self):
+        if not self.cmd: return
         try:
-            fun = self.mapper[cmd]
+            fun = self.mapper[self.cmd]
         except:
             raise Exception("this cmd not defined:",cmd)
         fun()
@@ -218,7 +237,7 @@ class PCCmdPhaser():
         self.g.sprites.append(s)
         self.g.msg('drop item: '+s.getName())
         emit(self.g,INVCHANGED)
-        emit(self.g,SPRITECHANGED,len(self.g.sprites)-1)
+        emit(self.g,SPRITECHANGED,SPRITE_CREATE,len(self.g.sprites)-1)
 
     def pcPickup(self):
         s = self.g.getSpriteByPos(*self.g.pc.getPos())
@@ -229,7 +248,7 @@ class PCCmdPhaser():
             index = self.g.sprites.index(s)
             self.g.sprites.remove(s)
             self.g.pcInv.append(s.itemdata)
-            emit(self.g,SPRITECHANGED,index)
+            emit(self.g,SPRITECHANGED,SPRITE_DIE,index)
             emit(self.g,INVCHANGED)
             
     def pcQuit(self):

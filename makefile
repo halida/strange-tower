@@ -11,3 +11,6 @@ t_v:
 #test opengl
 t_gl:
 	python test_opengl.py
+#test animation
+t_a:
+	python test_animation.py
