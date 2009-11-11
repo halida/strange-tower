@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/10/24 07:54:49>
-# last-update-time: <halida 11/11/2009 08:27:33>
+# last-update-time: <halida 11/11/2009 17:28:22>
 # ---------------------------------
 # 
 
@@ -68,10 +68,11 @@ def createAction(parent,
     if tip:
         action.setToolTip(tip)
         action.setStatusTip(tip)
-    if slot:
-        connect(action, signal, slot)
     if checkable:
         action.setCheckable(True)
+        signal = 'toggled(bool)'
+    if slot:
+        connect(action, signal, slot)
     return action
 
 def addActions(target, actions):

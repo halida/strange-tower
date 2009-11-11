@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/10 13:19:39>
-# last-update-time: <halida 11/11/2009 07:46:59>
+# last-update-time: <halida 11/11/2009 13:10:12>
 # ---------------------------------
 # 
 
@@ -13,6 +13,7 @@ from viewlib import *
 import game
 
 class SmallMapViewer(QLabel):
+    name = "Small Map Viewer"
     FLOOR_TO_COLOR = {
         '.':(255,255,255),
         '#':(  0,  0,  0),
