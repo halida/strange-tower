@@ -2,11 +2,9 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/12/2009 20:15:19>
+# last-update-time: <halida 11/13/2009 06:38:16>
 # ---------------------------------
 # 
-
-from view_to_pic import *
 
 class Sprite(object):
     def __init__(self,pos=(0,0)):
@@ -25,7 +23,8 @@ class Sprite(object):
         self.py = y
 
 class Item(Sprite):
-    view = V_ITEM
+    view = 'item'
+    ground = True
     def __init__(self,pos,itemdata):
         super(Item,self).__init__()
         self.itemdata = itemdata
@@ -36,20 +35,21 @@ class Item(Sprite):
         return "%s lays here." % self.getName()
 
 class Stair(Sprite):
+    ground = True
     def __init__(self,pos,upstair=False,downstair=False):
         super(Stair,self).__init__()
         self.upstair = upstair
         self.downstair = downstair
         self.setPos(*pos)
         if self.upstair:
-            self.view = V_UPSTAIR
+            self.view = 'upstair'
         elif self.downstair:
-            self.view = V_DOWNSTAIR
+            self.view = 'downstair'
     def getDesc(self):
         return "a staircase %s."% ('up' if self.upstair else 'down')
 
 class Sign(Sprite):
-    view = V_SIGN
+    view = 'sign'
     def __init__(self,text,pos):
         super(Sign,self).__init__()
         self.text = text
@@ -69,14 +69,16 @@ class LivingSprite(Sprite):
     def moveToUser(self,g):
         px,py = pp = g.pc.getPos()
         sx,sy = sp = self.getPos()
-        tx,ty = cmp(px,sx),cmp(py,sy)
+        tx,ty = self.directTo(px,py)
         self.toLoc = tx+sx,ty+sy
+    def directTo(self,px,py):
+        return cmp(px,self.px),cmp(py,self.py)
 
 class Foe(LivingSprite):
     animate = True
     slide = 0
     group = 'foe'
-    view = V_FOE
+    view = 'foe'
     size = (1,2)
     moving = LivingSprite.moveToUser
     name = "foe"

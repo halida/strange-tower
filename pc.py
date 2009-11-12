@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:21:16>
-# last-update-time: <halida 11/12/2009 21:04:02>
+# last-update-time: <halida 11/13/2009 06:23:33>
 # ---------------------------------
 # 
 
@@ -12,7 +12,7 @@ class PC(LivingSprite):
     animate = True
     slide = 0
     group = 'pc'
-    view = V_PC
+    view = 'pc'
     size = (1,2)
     name = "you"
 

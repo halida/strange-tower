@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/12/2009 22:26:32>
+# last-update-time: <halida 11/13/2009 06:30:03>
 # ---------------------------------
 # draw a map
 
@@ -16,7 +16,7 @@ class MapGraphCreater():
     EDGE = 10
     SW,SH = SIZE = 40,40
     bgcolor = QColor(240,240,240)
-    mapTileset = QPixmap('Graphics/Tilesets/map.png')
+    mapTileset = QPixmap('graphics/tileset/map.png')
 
     rect = QRectF(0,0,
                   P_SIZE*SIZE[0],

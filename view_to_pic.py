@@ -2,15 +2,16 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/10 03:44:19>
-# last-update-time: <halida 11/11/2009 12:16:14>
+# last-update-time: <halida 11/13/2009 06:28:05>
 # ---------------------------------
 # 
 
-V_ITEM = 'Graphics/Icons/item.png'
+import game
 
-V_PC = 'Graphics/Characters/pc.png'
-V_FOE = 'Graphics/Characters/foe.png'
-
-V_DOWNSTAIR = 'Graphics/Icons/downstair.png'
-V_UPSTAIR = 'Graphics/Icons/upstair.png'
-V_SIGN = 'Graphics/Icons/sign.png'
+ANIMATE_SEQ = {
+    game.SPRITE_MOVE_NONE   : 0,
+    game.SPRITE_MOVE_LEFT   : 0,
+    game.SPRITE_MOVE_RIGHT  : 1,
+    game.SPRITE_MOVE_UP     : 2,
+    game.SPRITE_MOVE_DOWN   : 3,
+}

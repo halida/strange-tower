@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/12/2009 23:03:27>
+# last-update-time: <halida 11/13/2009 06:49:51>
 # ---------------------------------
 # 
 
@@ -23,9 +23,34 @@ UPDATED = 'updated(QString,int)'#int is the sprite id
 STEPED = 'steped()'
 
 #game updates
-SPRITE_MOVE = 'spritemove'
+SPRITE_MOVE_NONE = 'spritemovenone'
+SPRITE_MOVE_LEFT = 'spritemoveleft'
+SPRITE_MOVE_RIGHT = 'spritemoveright'
+SPRITE_MOVE_UP = 'spritemoveup'
+SPRITE_MOVE_DOWN = 'spritemovedown'
+
 SPRITE_DIE = 'spritedie'
 SPRITE_CREATE = 'spritecreate'
+
+SPRITE_MOVES = (
+    SPRITE_MOVE_NONE,
+    SPRITE_MOVE_LEFT, 
+    SPRITE_MOVE_RIGHT,
+    SPRITE_MOVE_UP,  
+    SPRITE_MOVE_DOWN, 
+)
+
+DIRECT_TO_EVENT = {
+    (-1,-1):SPRITE_MOVE_LEFT,
+    (-1, 0):SPRITE_MOVE_LEFT,
+    (-1,+1):SPRITE_MOVE_LEFT,
+    (+1,-1):SPRITE_MOVE_RIGHT,
+    (+1, 0):SPRITE_MOVE_RIGHT,
+    (+1,+1):SPRITE_MOVE_RIGHT,
+    (0,-1):SPRITE_MOVE_UP,  
+    (0, 0):SPRITE_MOVE_NONE,
+    (0,+1):SPRITE_MOVE_DOWN, 
+    }
 
 class Game(QObject):
     ACTIVE_RANGE = 20
@@ -128,10 +153,12 @@ class Game(QObject):
 
         #when empty, sprite move
         if not torgets:
+            direct = s.directTo(*s.toLoc)
             s.moveTo(*s.toLoc)
+            movingEvent = DIRECT_TO_EVENT[direct]
             s.toLoc = None
             emit(self,UPDATED,
-                 SPRITE_MOVE,id(s))
+                 movingEvent,id(s))
             if s==self.pc: self.checkGroud()
 
         #when collide to sprite, attack

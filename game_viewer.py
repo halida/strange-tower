@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/13/2009 05:41:01>
+# last-update-time: <halida 11/13/2009 06:48:37>
 # ---------------------------------
 # 
 
@@ -19,7 +19,8 @@ class GameViewer(QGraphicsView):
         super(GameViewer,self).__init__()
         self.sprites = {}
         self.updates = []
-        self.animations = []
+        self.moves = []
+        self.animates = {}
 
         #hide scrollbar, not let user know the detail
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -76,20 +77,16 @@ class GameViewer(QGraphicsView):
             spriteGraph.setBrush(QColor(Qt.red))
         else:#have view
             spriteGraph = QGraphicsPixmapItem()
-            pixmap = QPixmap(s.view)
+            self.updateSprite(game.SPRITE_MOVE_NONE,id(s))
             if hasattr(s,'size'):
-                pos = (0, -(s.size[1]-1)*P_SIZE)
-                spriteGraph.setOffset(*pos)
-                pixmap = pixmap.copy(0,0,
-                                     s.size[0]*P_SIZE,
-                                     s.size[1]*P_SIZE)
-            spriteGraph.setPixmap(pixmap)
-
+                spriteGraph.setOffset((1-s.size[0])*P_SIZE,
+                                      (1-s.size[1])*P_SIZE)
         spriteGraph.setFlags(QGraphicsItem.ItemIsSelectable)
-        if isinstance(s,sprite.LivingSprite):
-            z = s.py+1
+        if hasattr(s,'ground'):
+            z = 1#not living, on the ground
         else:
-            z = 1
+            z = s.py+1
+
         spriteGraph.setZValue(z)
         spriteGraph.setPos(s.px*P_SIZE,s.py*P_SIZE)
 
@@ -99,24 +96,35 @@ class GameViewer(QGraphicsView):
         return spriteGraph
         #print "adding:",s
 
-    def animate(self):
+    def animate(self,frame):
         for type,id in self.updates:
-            if type == game.SPRITE_MOVE:
+            if type in game.SPRITE_MOVES:
                 #move animation
                 s = self.game.spriteByID(id)
                 g = self.sprites[id]
-                if not hasattr(s,'animate'): continue
-                pixmap = QPixmap(s.view)
-                s.slide = (s.slide+1)%4
-                pixmap = pixmap.copy(s.slide*P_SIZE,0,
-                                     s.size[0]*P_SIZE,
-                                     s.size[1]*P_SIZE)
-                g.setPixmap(pixmap)
+                if hasattr(s,'animate'):
+                    self.createAnimate(type,s,g,frame)
+                    
+    def createAnimate(self,type,s,g,frame):
+        c = s.__class__
+        try:
+            pixmap = self.animates[c]
+        except:
+            pixmap = QPixmap('graphics/view/'+s.view+'.png')
+            self.animates[c] = pixmap
+
+        s.slide = (s.slide+1)%4
+        seq = view_to_pic.ANIMATE_SEQ[type]
+        pixmap = pixmap.copy(s.size[0]*s.slide*P_SIZE,
+                             s.size[1]*seq    *P_SIZE,
+                             s.size[0]*P_SIZE,
+                             s.size[1]*P_SIZE)
+        g.setPixmap(pixmap)
 
     def step(self):
         for type,id in self.updates:
 
-            if type == game.SPRITE_MOVE:
+            if type in game.SPRITE_MOVES:
                 s = self.game.spriteByID(id)
                 g = self.sprites[id]
 
@@ -136,7 +144,7 @@ class GameViewer(QGraphicsView):
                            oy + sy * i,)
                     a.setPosAt(i/float(step),QPointF(*pos))
                     #print s.name,pos
-                self.animations.append(a)
+                self.moves = []
 
             elif type == game.SPRITE_CREATE:
                 s = self.game.spriteByID(id)
@@ -162,7 +170,7 @@ class GameViewer(QGraphicsView):
 
         #print 'finishing step..',self.updates
         for type,id in self.updates:
-            if type == game.SPRITE_MOVE:
+            if type in game.SPRITE_MOVES:
                 s = self.game.spriteByID(id)
                 g = self.sprites[id]
                 #print "seting new pos:",index,s.px*P_SIZE,s.py*P_SIZE
@@ -177,7 +185,7 @@ class GameViewer(QGraphicsView):
     def updateSprite(self,type,index):
         #buffer updates
         #print "buffering:",type,index
-        self.updates.append( (type,index) )
+        self.updates.append( (str(type),index) )
 
     def centerPC(self):
         pcGraph = self.sprites[id(self.game.pc)]
