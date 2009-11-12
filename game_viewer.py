@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/13/2009 05:18:42>
+# last-update-time: <halida 11/13/2009 05:41:01>
 # ---------------------------------
 # 
 
@@ -41,19 +41,6 @@ class GameViewer(QGraphicsView):
         self.mapGraphCreater = map_graph.MapGraphCreater(g)
 
         self.setGame(g)
-
-    def animate(self):
-        for type,id in self.updates:
-            if type == game.SPRITE_MOVE:
-                s = self.game.spriteByID(id)
-                g = self.sprites[id]
-                if not hasattr(s,'animate'): continue
-                pixmap = QPixmap(s.view)
-                s.slide = (s.slide+1)%4
-                pixmap = pixmap.copy(s.slide*P_SIZE,0,
-                                     s.size[0]*P_SIZE,
-                                     s.size[1]*P_SIZE)
-                g.setPixmap(pixmap)
         
     def wheelEvent(self,event):
         """
@@ -112,18 +99,24 @@ class GameViewer(QGraphicsView):
         return spriteGraph
         #print "adding:",s
 
-    def step(self):
-        #set animations
+    def animate(self):
         for type,id in self.updates:
-            if type == game.SPRITE_CREATE: 
+            if type == game.SPRITE_MOVE:
+                #move animation
                 s = self.game.spriteByID(id)
-                g = self.createSprite(s)
+                g = self.sprites[id]
+                if not hasattr(s,'animate'): continue
+                pixmap = QPixmap(s.view)
+                s.slide = (s.slide+1)%4
+                pixmap = pixmap.copy(s.slide*P_SIZE,0,
+                                     s.size[0]*P_SIZE,
+                                     s.size[1]*P_SIZE)
+                g.setPixmap(pixmap)
 
-            elif type == game.SPRITE_DIE:
-                g = self.sprites.pop(id)
-                self.scene.removeItem(g)
+    def step(self):
+        for type,id in self.updates:
 
-            elif type == game.SPRITE_MOVE:
+            if type == game.SPRITE_MOVE:
                 s = self.game.spriteByID(id)
                 g = self.sprites[id]
 
@@ -144,6 +137,17 @@ class GameViewer(QGraphicsView):
                     a.setPosAt(i/float(step),QPointF(*pos))
                     #print s.name,pos
                 self.animations.append(a)
+
+            elif type == game.SPRITE_CREATE:
+                s = self.game.spriteByID(id)
+                g = self.createSprite(s)
+                self.updates.remove((type,id))
+
+            elif type == game.SPRITE_DIE:
+                g = self.sprites.pop(id)
+                self.scene.removeItem(g)
+                self.updates.remove((type,id))
+
             else:
                 raise Exception("type error:",type)
 
@@ -163,6 +167,7 @@ class GameViewer(QGraphicsView):
                 g = self.sprites[id]
                 #print "seting new pos:",index,s.px*P_SIZE,s.py*P_SIZE
                 g.setPos(s.px*P_SIZE,s.py*P_SIZE)
+                g.setZValue(s.py+1)
 
         self.updates = []
         self.centerPC()
