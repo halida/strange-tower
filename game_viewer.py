@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/12/2009 23:01:50>
+# last-update-time: <halida 11/13/2009 05:18:42>
 # ---------------------------------
 # 
 
@@ -10,7 +10,7 @@ from qtlib import *
 
 from viewlib import *
 
-import game,map_graph,view_to_pic
+import game,map_graph,view_to_pic,sprite
 
 class GameViewer(QGraphicsView):
     FRAMERATE = 4
@@ -80,6 +80,7 @@ class GameViewer(QGraphicsView):
         for s in self.game.sprites:
             self.createSprite(s)
 
+        self.centerPC()#locate the right pos first
         if REAL_TIME:self.step()#first step
 
     def createSprite(self,s):
@@ -98,7 +99,11 @@ class GameViewer(QGraphicsView):
             spriteGraph.setPixmap(pixmap)
 
         spriteGraph.setFlags(QGraphicsItem.ItemIsSelectable)
-        spriteGraph.setZValue(s.py+1)#layout
+        if isinstance(s,sprite.LivingSprite):
+            z = s.py+1
+        else:
+            z = 1
+        spriteGraph.setZValue(z)
         spriteGraph.setPos(s.px*P_SIZE,s.py*P_SIZE)
 
         #finish
