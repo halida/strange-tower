@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/12/2009 20:11:22>
+# last-update-time: <halida 11/12/2009 20:59:31>
 # ---------------------------------
 # 
 
@@ -20,6 +20,7 @@ class GameViewer(QGraphicsView):
         self.sprites = {}
         self.updates = []
         self.animations = []
+
         #hide scrollbar, not let user know the detail
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -58,7 +59,6 @@ class GameViewer(QGraphicsView):
                                  s.size[1]*P_SIZE)
             
             g.setPixmap(pixmap)
-            
         
     def wheelEvent(self,event):
         """
@@ -88,6 +88,7 @@ class GameViewer(QGraphicsView):
         for i,s in enumerate(self.game.sprites):
             self.createSprite(i,s)
 
+        if REAL_TIME:self.step()
         self.centerPC()
 
     def createSprite(self,i,s):
@@ -169,6 +170,8 @@ class GameViewer(QGraphicsView):
         self.updates = []
         self.centerPC()
         self.game.inputEnable=True
+        #if real time, end step means new game step
+        if REAL_TIME: self.game.step()
 
     def updateSprite(self,type,index):
         #buffer updates
@@ -179,5 +182,4 @@ class GameViewer(QGraphicsView):
         pc,pcGraph = self.sprites[0]
         #center pc
         self.centerOn(pcGraph)
-
 
