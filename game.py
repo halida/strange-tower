@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/13/2009 06:49:51>
+# last-update-time: <halida 11/13/2009 07:21:14>
 # ---------------------------------
 # 
 
@@ -29,6 +29,7 @@ SPRITE_MOVE_RIGHT = 'spritemoveright'
 SPRITE_MOVE_UP = 'spritemoveup'
 SPRITE_MOVE_DOWN = 'spritemovedown'
 
+SPRITE_ATK = 'spriteatk'
 SPRITE_DIE = 'spritedie'
 SPRITE_CREATE = 'spritecreate'
 
@@ -184,6 +185,7 @@ class Game(QObject):
                       self.sprites,)
 
     def atk(self,s,d):
+        emit(self,UPDATED,SPRITE_ATK,id(s))
         #check if hit
         if randint(1,20) > s.hit - d.ac:
             self.msg('%s not hit torget.'%s.name)
@@ -194,6 +196,7 @@ class Game(QObject):
         if hit <0: hit = 0
         d.hp -= hit
         self.msg("%s take %d damage from %s."%(d.name,hit,s.name))
+
 
         #die
         if d.hp <= 0:

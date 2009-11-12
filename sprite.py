@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/13/2009 06:38:16>
+# last-update-time: <halida 11/13/2009 07:11:30>
 # ---------------------------------
 # 
 
@@ -78,7 +78,7 @@ class Foe(LivingSprite):
     animate = True
     slide = 0
     group = 'foe'
-    view = 'foe'
+    view = 'pc'
     size = (1,2)
     moving = LivingSprite.moveToUser
     name = "foe"

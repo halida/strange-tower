@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/13/2009 06:48:37>
+# last-update-time: <halida 11/13/2009 07:22:12>
 # ---------------------------------
 # 
 
@@ -14,13 +14,14 @@ import game,map_graph,view_to_pic,sprite
 
 class GameViewer(QGraphicsView):
     FRAMERATE = 4
-    STEP_TIME = 200
+    STEP_TIME = 400
     def __init__(self,g):
         super(GameViewer,self).__init__()
         self.sprites = {}
         self.updates = []
         self.moves = []
-        self.animates = {}
+        self.animates = []
+        self.animateData = {}
 
         #hide scrollbar, not let user know the detail
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -60,6 +61,7 @@ class GameViewer(QGraphicsView):
     def updateMap(self):
         print "map updating.."
         self.sprites = {}
+        self.animateData = {}
         self.scene.clear()
         self.mapGraphCreater.updateMap(createGraph=True)
         self.scene.addItem(self.mapGraphCreater.graph)
@@ -97,21 +99,19 @@ class GameViewer(QGraphicsView):
         #print "adding:",s
 
     def animate(self,frame):
-        for type,id in self.updates:
-            if type in game.SPRITE_MOVES:
-                #move animation
-                s = self.game.spriteByID(id)
-                g = self.sprites[id]
-                if hasattr(s,'animate'):
-                    self.createAnimate(type,s,g,frame)
+        for sid,type in self.animates.iteritems():
+            s = self.game.spriteByID(sid)
+            g = self.sprites[sid]
+            if hasattr(s,'animate'):
+                self.createAnimate(type,s,g,frame)
                     
     def createAnimate(self,type,s,g,frame):
         c = s.__class__
         try:
-            pixmap = self.animates[c]
+            pixmap = self.animateData[c]
         except:
             pixmap = QPixmap('graphics/view/'+s.view+'.png')
-            self.animates[c] = pixmap
+            self.animateData[c] = pixmap
 
         s.slide = (s.slide+1)%4
         seq = view_to_pic.ANIMATE_SEQ[type]
@@ -122,11 +122,19 @@ class GameViewer(QGraphicsView):
         g.setPixmap(pixmap)
 
     def step(self):
-        for type,id in self.updates:
+        #standard animation
+        self.animates = {}
+        for s in self.game.sprites:
+            self.animates[id(s)] = game.SPRITE_MOVE_NONE
 
+        for type,sid in self.updates:
             if type in game.SPRITE_MOVES:
-                s = self.game.spriteByID(id)
-                g = self.sprites[id]
+                #schedule animation
+                self.animates[sid] = type
+
+                #schedule move
+                s = self.game.spriteByID(sid)
+                g = self.sprites[sid]
 
                 oldp = ox,oy = g.x(),g.y()
                 newp = nx,ny = s.px*P_SIZE,s.py*P_SIZE
@@ -154,8 +162,10 @@ class GameViewer(QGraphicsView):
             elif type == game.SPRITE_DIE:
                 g = self.sprites.pop(id)
                 self.scene.removeItem(g)
-                self.updates.remove((type,id))
+                self.animates.pop(id)
 
+            elif type == game.SPRITE_ATK:
+                self.animates[sid] = type
             else:
                 raise Exception("type error:",type)
 
