@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/10 13:19:39>
-# last-update-time: <halida 11/11/2009 13:10:12>
+# last-update-time: <halida 11/12/2009 22:02:14>
 # ---------------------------------
 # 
 
@@ -25,9 +25,8 @@ class SmallMapViewer(QLabel):
         self.game = g
         self.map = None
         self.pcPos = None
-        self.updateMap()
         connect(self.game,game.MAPCHANGED,self.updateMap)
-        connect(self.game,game.PCMOVED,self.update)
+        connect(self.game,game.STEPED,self.update)
 
     def checkUpdate(self):
         px,py = self.game.pc.getPos()

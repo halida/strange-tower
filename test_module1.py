@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 06:30:35>
-# last-update-time: <halida 11/11/2009 18:44:56>
+# last-update-time: <halida 11/12/2009 23:05:54>
 # ---------------------------------
 # 
 
@@ -47,7 +47,7 @@ the tower is still a mistery to you.
 """
 
 def setGame(game):
-    game.pcInv = [
+    game.pc.inv = [
         I_ration,
         I_t_shirt,
         ]
@@ -73,5 +73,7 @@ def setGame(game):
     game.levels.append(topMap)
     
     #init
-    game.changeMap(level=0)
     game.pc.setPos(2,6)
+    game.changeMap(level=0)
+
+

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/12 12:44:22>
-# last-update-time: <halida 11/12/2009 20:59:22>
+# last-update-time: <halida 11/12/2009 22:43:22>
 # ---------------------------------
 # 
 
@@ -87,12 +87,12 @@ class UserActionPhaser():
     def pcDrop(self):
         i = self.g.uiwrapper.selectItem()
         if i==None: return
-        item = self.g.pcInv.pop(i)
+        item = self.g.pc.inv.pop(i)
         s = sprite.Item(self.g.pc.getPos(),item)
         self.g.sprites.append(s)
         self.g.msg('drop item: '+s.getName())
         emit(self.g,INVCHANGED)
-        emit(self.g,SPRITECHANGED,SPRITE_CREATE,len(self.g.sprites)-1)
+        emit(self.g,UPDATED,SPRITE_CREATE,id(s))
 
     def pcPickup(self):
         s = self.g.getSpriteByPos(*self.g.pc.getPos())
@@ -102,7 +102,7 @@ class UserActionPhaser():
             self.g.msg('pick upped: %s'%s.getName())
             index = self.g.sprites.index(s)
             self.g.sprites.remove(s)
-            self.g.pcInv.append(s.itemdata)
+            self.g.pc.inv.append(s.itemdata)
             emit(self.g,SPRITECHANGED,SPRITE_DIE,index)
             emit(self.g,INVCHANGED)
 
@@ -112,7 +112,8 @@ class UserActionPhaser():
         self.g.atk(self.g.pc,t)
             
     def pcQuit(self):
-        sys.exit(1)
+        print "game ends, bye!"
+        sys.exit(0)
 
     def keyPressEvent(self,event):
         #change event to keymap
@@ -126,6 +127,6 @@ class UserActionPhaser():
         #change keymap to command
         r = self.evalKeymap(key,sft,ctl,alt)
 
-        #if not real time, game step when user key event
+        #if not real time, game steps when user key event
         if not REAL_TIME: 
             if r: self.game.step()

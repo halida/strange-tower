@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:17:28>
-# last-update-time: <halida 11/11/2009 13:04:26>
+# last-update-time: <halida 11/12/2009 22:26:32>
 # ---------------------------------
 # draw a map
 
@@ -31,8 +31,8 @@ class MapGraphCreater():
         self.game = g
         self.scrPos = -100,-100
         self.graph = None
-        self.updateMap()
-        connect(self.game,game.PCMOVED,self.checkUpdateMap)
+        #connect(self.game,game.MAPCHANGED,self.updateMap)
+        connect(self.game,game.STEPED,self.checkUpdateMap)
 
     def checkUpdateMap(self):
         #check if PC move to the edge
@@ -46,7 +46,7 @@ class MapGraphCreater():
             return
         self.updateMap()
 
-    def updateMap(self):            
+    def updateMap(self,createGraph=False):            
         #if on edge, update map
         px,py = pcpos = self.game.pc.getPos()
         sx,sy = self.scrPos = px - self.SW/2 , py - self.SH/2
@@ -77,7 +77,7 @@ class MapGraphCreater():
             y += 1
 
         #create mapgraph
-        if not self.graph:
+        if createGraph or (not self.graph):
             self.graph = MapGraph()
         self.graph.setPixmap(self.mapImage)                
         self.graph.setPos(sx*P_SIZE,sy*P_SIZE)

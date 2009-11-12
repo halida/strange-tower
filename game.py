@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/12/2009 21:00:29>
+# last-update-time: <halida 11/12/2009 23:03:27>
 # ---------------------------------
 # 
 
@@ -15,14 +15,14 @@ from viewlib import *
 import sprite,pc,maplib
 
 #game events
-PCMOVED = 'pcMoved()'
-MAPCHANGED = 'mapChanged()'
 ONMESSAGE = 'onMessage(QString)'
 INVCHANGED = 'invChanged()'
-SPRITECHANGED = 'spriteChanged(QString,int)'
+
+MAPCHANGED = 'mapChanged()'
+UPDATED = 'updated(QString,int)'#int is the sprite id
 STEPED = 'steped()'
 
-#step updates
+#game updates
 SPRITE_MOVE = 'spritemove'
 SPRITE_DIE = 'spritedie'
 SPRITE_CREATE = 'spritecreate'
@@ -34,9 +34,9 @@ class Game(QObject):
         self.uiwrapper = None
         self.userCmd = None
         self.map = None
-        self.sprites = []
+
         self.pc = pc.PC()
-        self.pcInv = []
+        self.sprites = []
 
     def loadModule(self,module):
         module.setGame(self)
@@ -69,7 +69,8 @@ class Game(QObject):
             newloc = self.map['downstair']
         else:
             newloc = self.map['upstair']
-        self.pc.setPos(*newloc)
+        if direct:
+            self.pc.setPos(*newloc)
 
         #set sprites
         if self.map.has_key('sprites'):
@@ -83,19 +84,6 @@ class Game(QObject):
     def msg(self,m):
         emit(self,ONMESSAGE,m)
         
-    def checkPCCollideToMap(self):
-        x,y = self.pc.px,self.pc.py
-        try:
-            if x<0 or y<0: raise
-            result = maplib.collideToMap(self.map,x,y)
-        except:
-            self.msg('You don\'t want go out.')
-            return True
-        
-        if result:
-            self.msg('Opps,you hit a wall.')
-        return result
-
     def step(self):
         #print "stepping.."
         
@@ -103,7 +91,8 @@ class Game(QObject):
         if self.userCmd: self.userCmd()
 
         #moving
-        sprites = filter(lambda s:isinstance(s,sprite.LivingSprite),
+        sprites = filter(lambda s:
+                             isinstance(s,sprite.LivingSprite),
                          self.sprites)
         sprites = filter(self.nearPC,sprites)
         for s in sprites:
@@ -111,39 +100,58 @@ class Game(QObject):
         sprites = filter(lambda s:s.toLoc!=None,
                          sprites)
 
-        #check collide
+        #caution: if s die, s still can act.
         for s in sprites:
-            if s == self.pc: self.checkPCCollideToMap()
-            if not maplib.collideToMap(self.map,*s.toLoc):
-                torgets = self.collide(s.toLoc)
-                torgets = filter(lambda s:isinstance(s,sprite.LivingSprite),
-                                 torgets)
-                if not torgets:#no collide
-                    s.moveTo(*s.toLoc)
-                    s.toLoc = None
-                    emit(self,SPRITECHANGED,SPRITE_MOVE,self.sprites.index(s))
-                else:#collide to sprite
-                    for t in torgets:
-                        #attack
-                        if t.group != s.group:
-                            self.atk(s,t)
+            self.checkSpriteMoving(s)
 
-            #if pc moving
-            if s == self.pc:
-                #check whats on the ground
-                sprites = self.collide(self.pc.getPos())
-                for s in sprites:
-                    if s!=self.pc:
-                        emit(self,ONMESSAGE,s.getDesc())
-                emit(self,PCMOVED)
         emit(self,STEPED)
         #print "stepped"
+
+    def checkSpriteMoving(self,s):
+        #check map collide
+        collide = maplib.collideToMap(self.map,*s.toLoc)
+        #oops, cannot move
+        if collide:
+            if s == self.pc: 
+                if type == maplib.COLLIDE_TO_WALL:
+                    self.msg('Opps,you hit a wall.')
+                elif type == maplib.COLLIDE_OUT_MAP:
+                    self.msg('You don\'t want go out.')
+            return
+
+        #check sprite collide
+        torgets = self.collideToSprite(s.toLoc)
+        torgets = filter(
+            lambda s:
+                isinstance(s,sprite.LivingSprite),
+            torgets)
+
+        #when empty, sprite move
+        if not torgets:
+            s.moveTo(*s.toLoc)
+            s.toLoc = None
+            emit(self,UPDATED,
+                 SPRITE_MOVE,id(s))
+            if s==self.pc: self.checkGroud()
+
+        #when collide to sprite, attack
+        else:
+            for t in torgets:
+                #attack
+                if t.group != s.group:
+                    self.atk(s,t); return#only attack once
+
+    def checkGroud(self):
+        sprites = self.collideToSprite(self.pc.getPos())
+        for s in sprites:
+            if s!=self.pc:
+                emit(self,ONMESSAGE,s.getDesc())
 
     def nearPC(self,s):
         return ((abs(self.pc.px - s.px) < self.ACTIVE_RANGE) and
                 (abs(self.pc.px - s.px) < self.ACTIVE_RANGE))
 
-    def collide(self,pos):
+    def collideToSprite(self,pos):
         return filter(lambda st:
                           st.getPos()==pos,
                       self.sprites,)
@@ -151,20 +159,24 @@ class Game(QObject):
     def atk(self,s,d):
         #check if hit
         if randint(1,20) > s.hit - d.ac:
-            self.msg('%s not hit.'%s.name)
+            self.msg('%s not hit torget.'%s.name)
             return
+
         #hit
         hit = randint(*s.atk) - d.abs
         if hit <0: hit = 0
         d.hp -= hit
         self.msg("%s take %d damage from %s."%(d.name,hit,s.name))
+
         #die
         if d.hp <= 0:
             self.msg("%s die."%d.name)
             if d == self.pc:
                 self.step = None#end game
             else:
-                i = self.sprites.index(d)
                 self.sprites.remove(d)
-                emit(self,SPRITECHANGED,SPRITE_DIE,i)
+                emit(self,UPDATED,SPRITE_DIE,id(d))
 
+    def spriteByID(self,ID):
+        for s in self.sprites:
+            if id(s) == ID: return s

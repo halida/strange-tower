@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/12/2009 20:56:51>
+# last-update-time: <halida 11/12/2009 22:57:06>
 # ---------------------------------
 # 
 
@@ -22,8 +22,6 @@ import message_viewer
 class M(QMainWindow):
     def init(self):
         self.game = game.Game()
-        self.game.loadModule(test_module1)
-
         #views
         self.gv = game_viewer.GameViewer(self.game)
         self.game.uiwrapper = uiwrapper.UiWrapper(self.gv)
@@ -44,6 +42,7 @@ class M(QMainWindow):
         #self.setWindowState(Qt.WindowMaximized)
         self.resize(0,0)
         self.show()
+        self.game.loadModule(test_module1)
         self.msg('game created!')
 
     def setViews(self,*views):
@@ -98,9 +97,10 @@ class M(QMainWindow):
             item = self.gv.scene.selectedItems()[0]
         except: return
         
-        for s,g in self.gv.sprites:
+        for id,g in self.gv.sprites.iteritems():
             if g == item:
-                self.gvViewer.setText(s.getDesc())
+                self.gvViewer.setText(
+                    self.game.spriteByID(id).getDesc())
                 QTimer.singleShot(5000,lambda:self.msger.setText(""))        
 
 def main():
