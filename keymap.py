@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/10 04:48:24>
-# last-update-time: <halida 11/10/2009 15:02:19>
+# last-update-time: <halida 11/11/2009 19:38:25>
 # ---------------------------------
 # defines keymap
 
@@ -13,8 +13,9 @@ PC_FUNCS = (PC_NOP,PC_SEARCH,
             PC_MOVE_UP_LEFT,PC_MOVE_UP_RIGHT,PC_MOVE_DOWN_LEFT,PC_MOVE_DOWN_RIGHT,
             PC_DOWNSTAIR,PC_UPSTAIR,
             PC_DROP,PC_PICKUP,
+            PC_SHOOT,
             PC_QUIT,
-            ) = range(15)
+            ) = range(16)
 
 func2key = {
     PC_SEARCH                 : Qt.Key_S,
@@ -31,6 +32,8 @@ func2key = {
 
     PC_DOWNSTAIR              : Qt.Key_Less,
     PC_UPSTAIR                : Qt.Key_Greater,
+
+    PC_SHOOT                  : Qt.Key_T,
 
     PC_DROP                   : Qt.Key_D,
     PC_PICKUP                 : Qt.Key_Comma,

@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:25:07>
-# last-update-time: <halida 11/11/2009 08:37:44>
+# last-update-time: <halida 11/12/2009 20:15:19>
 # ---------------------------------
 # 
 
@@ -58,6 +58,7 @@ class Sign(Sprite):
         return "a sign: %s" % self.text
 
 class LivingSprite(Sprite):
+    group = 'base'
     moving = None
     def __init__(self):
         super(LivingSprite,self).__init__()
@@ -72,6 +73,9 @@ class LivingSprite(Sprite):
         self.toLoc = tx+sx,ty+sy
 
 class Foe(LivingSprite):
+    animate = True
+    slide = 0
+    group = 'foe'
     view = V_FOE
     size = (1,2)
     moving = LivingSprite.moveToUser

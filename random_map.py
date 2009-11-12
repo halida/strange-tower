@@ -2,14 +2,14 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 08:55:52>
-# last-update-time: <halida 11/10/2009 20:34:12>
+# last-update-time: <halida 11/11/2009 19:05:25>
 # ---------------------------------
 # 
 
 from viewlib import *
 
 import random
-import sprite
+import sprite,maplib
 
 randint = random.randint
 
@@ -160,3 +160,37 @@ def createMap(map,upP=None,downP=None):
                 upstair=upP,downstair=downP,
                 sprites=sprites)
     
+def randomFoe(map,foeRandNum=(20,30),
+              rhp=(10,20),
+              ratk=((1,4),(4,12)),
+              rhit=(1,10),
+              rabs=(0,3),
+              rac=(1,10),):
+    foeNum = randint(*foeRandNum)
+    createdFoe = 0
+    while createdFoe < foeNum:
+        sw,sh = map['size']
+        pos = randint(0,sw),randint(0,sh)
+        #check collide
+        try:
+            if maplib.collideToMap(map,*pos): continue
+        except:
+            continue
+        if maplib.collideToSprite(map,*pos): continue
+        #create foe
+        hp = randint(*rhp)
+        atk = randint(*ratk[0]),randint(*ratk[1])
+        hit = randint(*rhit)
+        abs = randint(*rabs)
+        ac = randint(*rac)
+        foe = sprite.Foe(
+            pos=pos,
+            hp = hp,
+            atk = atk,
+            hit = hit,
+            abs = abs,
+            ac = ac,
+            )
+        #insert
+        createdFoe += 1
+        map['sprites'].append(foe)

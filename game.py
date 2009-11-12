@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/11/2009 12:54:44>
+# last-update-time: <halida 11/12/2009 20:17:27>
 # ---------------------------------
 # 
 
@@ -12,7 +12,7 @@ from items import *
 from keymap import *
 from viewlib import *
 
-import sprite,pc
+import sprite,pc,maplib
 
 #events
 PCMOVED = 'pcMoved()'
@@ -27,11 +27,11 @@ SPRITE_DIE = 'spritedie'
 SPRITE_CREATE = 'spritecreate'
 
 class Game(QObject):
-    REAL_TIME = False
-    def __init__(self,uiwrapper):
+    RANGE = 20
+    REAL_TIME = True
+    def __init__(self):
         super(Game,self).__init__()
-        self.uiwrapper = uiwrapper
-        uiwrapper.game = self
+        self.uiwrapper = None
         self.pcCmdPhaser = PCCmdPhaser(self)
         self.evalKeymap = self.pcCmdPhaser.evalKeymap
         self.map = None
@@ -91,10 +91,11 @@ class Game(QObject):
     def msg(self,m):
         emit(self,ONMESSAGE,m)
         
-    def checkCollideToMap(self,x,y):
+    def checkPCCollideToMap(self):
+        x,y = self.pc.px,self.pc.py
         try:
             if x<0 or y<0: raise
-            result = (self.map['map'][y][x] == '#')
+            result = maplib.collideToMap(self.map,x,y)
         except:
             self.msg('You don\'t want go out.')
             return True
@@ -111,6 +112,7 @@ class Game(QObject):
         #moving
         sprites = filter(lambda s:isinstance(s,sprite.LivingSprite),
                          self.sprites)
+        sprites = filter(self.nearPC,sprites)
         for s in sprites:
             if s.moving: s.moving(self)
         sprites = filter(lambda s:s.toLoc!=None,
@@ -118,7 +120,8 @@ class Game(QObject):
 
         #check collide
         for s in sprites:
-            if not self.checkCollideToMap(*s.toLoc):
+            if s == self.pc: self.checkPCCollideToMap()
+            if not maplib.collideToMap(self.map,*s.toLoc):
                 torgets = self.collide(s.toLoc)
                 torgets = filter(lambda s:isinstance(s,sprite.LivingSprite),
                                  torgets)
@@ -128,7 +131,9 @@ class Game(QObject):
                     emit(self,SPRITECHANGED,SPRITE_MOVE,self.sprites.index(s))
                 else:#collide to sprite
                     for t in torgets:
-                        if t!=s: self.atk(s,t)
+                        #attack
+                        if t.group != s.group:
+                            self.atk(s,t)
 
             #if pc moving
             if s == self.pc:
@@ -140,6 +145,10 @@ class Game(QObject):
                 emit(self,PCMOVED)
         emit(self,STEPED)
         #print "stepped"
+
+    def nearPC(self,s):
+        return ((abs(self.pc.px - s.px) < self.RANGE) and
+                (abs(self.pc.px - s.px) < self.RANGE))
 
     def collide(self,pos):
         return filter(lambda st:
@@ -185,6 +194,8 @@ class PCCmdPhaser():
 
             PC_DOWNSTAIR              : lambda: self.pcStair(-1),
             PC_UPSTAIR                : lambda: self.pcStair( 1),
+
+            PC_SHOOT                  : self.pcShoot,
 
             PC_DROP                   : self.pcDrop,
             PC_PICKUP                 : self.pcPickup,
@@ -256,6 +267,11 @@ class PCCmdPhaser():
             self.g.pcInv.append(s.itemdata)
             emit(self.g,SPRITECHANGED,SPRITE_DIE,index)
             emit(self.g,INVCHANGED)
+
+    def pcShoot(self):
+        t = self.g.uiwrapper.selectTorget()
+        if t==None: return
+        self.g.atk(self.g.pc,t)
             
     def pcQuit(self):
         sys.exit(0)

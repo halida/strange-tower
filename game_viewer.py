@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 # ---------------------------------
 # create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/11/2009 12:55:43>
+# last-update-time: <halida 11/12/2009 20:11:22>
 # ---------------------------------
 # 
 
@@ -10,33 +10,55 @@ from qtlib import *
 
 from viewlib import *
 
-import game,map_graph
+import game,map_graph,view_to_pic
 
 class GameViewer(QGraphicsView):
-    FRAMERATE = 8
-    STEP_TIME = 500
+    FRAMERATE = 4
+    STEP_TIME = 200
     def __init__(self,g):
         super(GameViewer,self).__init__()
         self.sprites = {}
         self.updates = []
         self.animations = []
-
+        #hide scrollbar, not let user know the detail
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
 
-        #timer
+        #moving timer
         self.timer = QTimeLine(self.STEP_TIME)
         self.timer.setFrameRange(1,self.FRAMERATE)
         connect(self.timer,"finished()",self.finishStep)
         #connect(self.timer,"frameChanged(int)",
         #        lambda i:self.game.msg(str(self.sprites[3][1].pos())))
 
+        #animation timer
+        self.atimer = QTimer()
+        connect(self.atimer,"timeout()",self.animate)
+        self.atimer.start(100)
+
         self.setBackgroundBrush(QBrush(QColor(250,250,250)))
         self.setMinimumSize(640,480)
         self.mapGraphCreater = map_graph.MapGraphCreater(g)
 
         self.setGame(g)
+
+    def animate(self):
+        for type,index in self.updates:
+            if type != game.SPRITE_MOVE: continue
+            s,g = self.sprites[index]
+            if not hasattr(s,'animate'): return
+
+            pixmap = QPixmap(s.view)
+            s.slide = (s.slide+1)%4
+            pixmap = pixmap.copy(s.slide*P_SIZE,0,
+                                 s.size[0]*P_SIZE,
+                                 s.size[1]*P_SIZE)
+            
+            g.setPixmap(pixmap)
+            
         
     def wheelEvent(self,event):
         """
@@ -84,7 +106,7 @@ class GameViewer(QGraphicsView):
         else:#sprite have no view
             spriteGraph = QGraphicsEllipseItem(0,0,P_SIZE,P_SIZE)
             spriteGraph.setBrush(QColor(Qt.red))
-        #spriteGraph.setFlags(QGraphicsItem.ItemIsMovable)
+        spriteGraph.setFlags(QGraphicsItem.ItemIsSelectable)
         #sprite pos
         z = 10 if s==self.game.pc else 1
         spriteGraph.setZValue(z)
@@ -157,4 +179,5 @@ class GameViewer(QGraphicsView):
         pc,pcGraph = self.sprites[0]
         #center pc
         self.centerOn(pcGraph)
+
 
