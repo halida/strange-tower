@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/10 13:19:39>
-# last-update-time: <halida 11/12/2009 22:02:14>
-# ---------------------------------
-# 
+"""
+small map
+"""
 
 from qtlib import *
 

@@ -15,7 +15,7 @@ import game
 class MapGraphCreater():
     EDGE = 10
     SW,SH = SIZE = 40,40
-    bgcolor = QColor(240,240,240)
+    bgcolor = Qt.black#QColor(240,240,240)
     mapTileset = QPixmap('graphics/tileset/map.png')
 
     rect = QRectF(0,0,
@@ -37,14 +37,21 @@ class MapGraphCreater():
     def checkUpdateMap(self):
         #check if PC move to the edge
         EDGE = self.EDGE
-        sx,sy = self.scrPos
         sw,sh = self.SIZE
-        px,py = pcpos = self.game.pc.getPos()
+        ox, oy = self.getOffset()
         #print "check pc out:",pcpos,self.scrPos,self.SIZE
-        if ((sx+EDGE <= px < sx+sw-EDGE) and 
-            (sy+EDGE <= py < sy+sh-EDGE)):
+        if ((EDGE <= ox < sw-EDGE) and 
+            (EDGE <= oy < sh-EDGE)):
             return
         self.updateMap()
+
+    def getOffset(self):
+        "get offset for pc and the rendered map"
+        sx,sy = self.scrPos
+        px,py = pcpos = self.game.pc.getPos()
+        ox = px - sx
+        oy = py - sy
+        return ox, oy
 
     def updateMap(self,createGraph=False):            
         #if on edge, update map

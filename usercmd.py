@@ -1,23 +1,21 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/12 12:44:22>
-# last-update-time: <halida 11/13/2009 06:32:49>
-# ---------------------------------
-# 
+"""
+phase user action
+"""
 
 from keymap import *
 from viewlib import *
 
 import game
 
-class UserActionPhaser():
-    def __init__(self,gv,g):
+class UserCmd:
+    def __init__(self,gv,game):
         #redirect gv key input
         gv.keyPressEvent = self.keyPressEvent
 
-        self.g = g
-        self.g.userCmd = self.phase
+        self.game = game
+        self.game.setUserCmd(self.phase)
 
         self.cmd = None
         self.mapper = {
@@ -45,6 +43,9 @@ class UserActionPhaser():
             }
 
     def evalKeymap(self,key,sft,ctl,alt):
+        """
+        eval cmd, and return if this cmd evaled
+        """
         try:
             cmd = key2func[key]
         except:
@@ -63,53 +64,53 @@ class UserActionPhaser():
         fun()
 
     def pcMove(self,dx,dy):
-        newloc = (dx + self.g.pc.px,
-                  dy + self.g.pc.py)
-        self.g.pc.toLoc = newloc
+        newloc = (dx + self.game.pc.px,
+                  dy + self.game.pc.py)
+        self.game.pc.toLoc = newloc
             
     def pcSearch(self):
-        self.g.msg('Searching...')            
+        self.game.msg('Searching...')            
             
     def pcStair(self,stair):
         if stair == -1:
-            if self.g.map['downstair'] <> self.g.pc.getPos():
-                self.g.msg('there is no downstair here.')
+            if self.game.map['downstair'] <> self.game.pc.getPos():
+                self.game.msg('there is no downstair here.')
             else:
-                self.g.changeMap(-1)
+                self.game.changeMap(-1)
         elif stair == 1:
-            if self.g.map['upstair'] <> self.g.pc.getPos():
-                self.g.msg('there is no upstair here.')
+            if self.game.map['upstair'] <> self.game.pc.getPos():
+                self.game.msg('there is no upstair here.')
             else:
-                self.g.changeMap(1)
+                self.game.changeMap(1)
         else:
             raise Exception("stair error:",stair)
 
     def pcDrop(self):
-        i = self.g.uiwrapper.selectItem()
+        i = self.game.uiwrapper.selectItem()
         if i==None: return
-        item = self.g.pc.inv.pop(i)
-        s = sprite.Item(self.g.pc.getPos(),item)
-        self.g.sprites.append(s)
-        self.g.msg('drop item: '+s.getName())
-        emit(self.g,INVCHANGED)
-        emit(self.g,UPDATED,SPRITE_CREATE,id(s))
+        item = self.game.pc.inv.pop(i)
+        s = sprite.Item(self.game.pc.getPos(),item)
+        self.game.sprites.append(s)
+        self.game.msg('drop item: '+s.getName())
+        emit(self.game,INVCHANGED)
+        emit(self.game,UPDATED,SPRITE_CREATE,id(s))
 
     def pcPickup(self):
-        s = self.g.getSpriteByPos(*self.g.pc.getPos())
+        s = self.game.getSpriteByPos(*self.game.pc.getPos())
         if not s or not isinstance(s,sprite.Item):
-            self.g.msg('Nothing on the groud.')
+            self.game.msg('Nothing on the groud.')
         else:
-            self.g.msg('pick upped: %s'%s.getName())
-            index = self.g.sprites.index(s)
-            self.g.sprites.remove(s)
-            self.g.pc.inv.append(s.itemdata)
-            emit(self.g,SPRITECHANGED,SPRITE_DIE,index)
-            emit(self.g,INVCHANGED)
+            self.game.msg('pick upped: %s'%s.getName())
+            index = self.game.sprites.index(s)
+            self.game.sprites.remove(s)
+            self.game.pc.inv.append(s.itemdata)
+            emit(self.game,SPRITECHANGED,SPRITE_DIE,index)
+            emit(self.game,INVCHANGED)
 
     def pcShoot(self):
-        t = self.g.uiwrapper.selectTorget()
+        t = self.game.uiwrapper.selectTorget()
         if t==None: return
-        self.g.atk(self.g.pc,t)
+        self.game.atk(self.game.pc,t)
             
     def pcQuit(self):
         print "game ends, bye!"
@@ -125,8 +126,11 @@ class UserActionPhaser():
         if mod & Qt.AltModifier	   : alt = True
 
         #change keymap to command
-        r = self.evalKeymap(key,sft,ctl,alt)
+        evaled = self.evalKeymap(key,sft,ctl,alt)
 
         #if not real time, game steps when user key event
-        if not REAL_TIME: 
-            if r: self.game.step()
+        if not REAL_TIME and evaled:
+            self.game.step()
+            
+
+

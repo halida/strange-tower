@@ -1,28 +1,31 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/12 12:40:11>
-# last-update-time: <halida 11/12/2009 20:40:42>
-# ---------------------------------
-# 
+"""
+user interface
+"""
 
 from qtlib import *
 
 import game,game_viewer
 
-class UiWrapper():
+class UserInterface(object):
     def __init__(self,gv):
-        #super(UiWrapper,self).__init__()
         self.gv = gv
         self.game = gv.game
 
-    def selectItem(self):        
+    def selectItem(self):
+        """
+        tell the game what item is selected.
+        """
         itemlist = [i[NAME] for i in self.game.pcInv]
         if le(itemlist) <= 0: return 
         n,ok = QInputDialog.getItem(None,'','sect item:',itemlist,0,False)
         if ok: return itemlist.index(n)
 
     def selectTorget(self):
+        """
+        tell the game what torget is selected.
+        """
         #select torget
         items = self.gv.scene.selectedItems()
         if not items:

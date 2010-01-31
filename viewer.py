@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/08 07:18:42>
-# last-update-time: <halida 11/13/2009 07:22:12>
-# ---------------------------------
-# 
+"""
+viewer
+"""
 
 from qtlib import *
-
 from viewlib import *
 
 import game,map_graph,view_to_pic,sprite
@@ -17,16 +14,11 @@ class GameViewer(QGraphicsView):
     STEP_TIME = 400
     def __init__(self,g):
         super(GameViewer,self).__init__()
-        self.sprites = {}
-        self.updates = []
-        self.moves = []
-        self.animates = []
-        self.animateData = {}
-
         #hide scrollbar, not let user know the detail
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setRenderHint(QPainter.Antialiasing)
+
         #scene
         self.scene = QGraphicsScene()
         self.setScene(self.scene)
@@ -53,25 +45,30 @@ class GameViewer(QGraphicsView):
 
     def setGame(self,g):
         self.game = g
-        #events
         connect(self.game,game.MAPCHANGED,self.updateMap)
         connect(self.game,game.STEPED,self.step)
         connect(self.game,game.UPDATED,self.updateSprite)
+        self.updateMap()
 
     def updateMap(self):
         print "map updating.."
         self.sprites = {}
+        self.updates = []
         self.animateData = {}
         self.scene.clear()
+        #add map
         self.mapGraphCreater.updateMap(createGraph=True)
         self.scene.addItem(self.mapGraphCreater.graph)
 
-        #create sprites
+        #add sprites
         for s in self.game.sprites:
             self.createSprite(s)
 
-        self.centerPC()#locate the right pos first
-        if REAL_TIME:self.step()#first step
+        #locate the right pos first
+        self.centerPC()
+
+        #first step for real time
+        if REAL_TIME:self.step()
 
     def createSprite(self,s):
         if not hasattr(s,'view'):#no view
@@ -134,6 +131,7 @@ class GameViewer(QGraphicsView):
 
                 #schedule move
                 s = self.game.spriteByID(sid)
+                if not s: continue
                 g = self.sprites[sid]
 
                 oldp = ox,oy = g.x(),g.y()

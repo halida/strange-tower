@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/10 04:48:24>
-# last-update-time: <halida 11/11/2009 19:38:25>
-# ---------------------------------
-# defines keymap
-
+"""
+defines keymap
+"""
 from qtlib import *
 
 PC_FUNCS = (PC_NOP,PC_SEARCH,

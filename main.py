@@ -1,49 +1,53 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/07 03:08:29>
-# last-update-time: <halida 11/12/2009 22:57:06>
-# ---------------------------------
-# 
+"""
+entry point
+"""
 
 from qtlib import *
 from items import *
 
 import game,test_module1,sprite
 
-import uiwrapper
-import user_action_phaser
-import game_viewer
+import ui
+import usercmd
+import rawviewer
 import inv_viewer
 import pc_viewer
-import smallmap_viewer
-import message_viewer
+import smallmap
+import messager
 
 class M(QMainWindow):
     def init(self):
         self.game = game.Game()
+        self.game.loadModule(test_module1)
         #views
-        self.gv = game_viewer.GameViewer(self.game)
-        self.game.uiwrapper = uiwrapper.UiWrapper(self.gv)
-        self.uap = user_action_phaser.UserActionPhaser(self.gv,self.game)
+        self.gv = rawviewer.GameViewer(self.game)
+        self.userCmd = usercmd.UserCmd(self.gv,self.game)
+        # self.ui = ui.UserInterface(self.gv)
+        # self.game.setUi(self.ui)
 
-        self.mv = message_viewer.MessageViewer(self.game)
+        self.mv = messager.MessageViewer(self.game)
         self.iv = inv_viewer.InvViewer(self.game)
-        self.smv = smallmap_viewer.SmallMapViewer(self.game)
+        self.smv = smallmap.SmallMapViewer(self.game)
         self.pcv = pc_viewer.PCViewer(self.game)
 
         #layout
-        self.setViews(self.smv,self.iv,self.mv,self.pcv)
+        self.setViews(self.smv,
+                      self.iv,
+                      self.mv,
+                      self.pcv)
         self.setCentralWidget(self.gv)
         self.createStatusBar()
 
         #event
-        self.gv.setFocus()#set gv focus to trig key event
-        #self.setWindowState(Qt.WindowMaximized)
-        self.resize(0,0)
+        #set gv focus to trig key event
+        self.gv.setFocus()
+        self.setWindowState(Qt.WindowMaximized)
         self.show()
-        self.game.loadModule(test_module1)
+
         self.msg('game created!')
+        self.game.processEvent()
 
     def setViews(self,*views):
         #docks menu
@@ -85,23 +89,23 @@ class M(QMainWindow):
         self.statusBar.insertWidget(1,self.gvViewer)
         self.setStatusBar(self.statusBar)
 
-        connect(self.gv.scene,'selectionChanged()',
-                self.updateStatus)
+        # connect(self.gv.scene,'selectionChanged()',
+        #         self.updateStatus)
 
     def msg(self,msg):
         self.msger.setText(msg)
         QTimer.singleShot(5000,lambda:self.msger.setText(""))
 
-    def updateStatus(self):
-        try:
-            item = self.gv.scene.selectedItems()[0]
-        except: return
+    # def updateStatus(self):
+    #     try:
+    #         item = self.gv.scene.selectedItems()[0]
+    #     except: return
         
-        for id,g in self.gv.sprites.iteritems():
-            if g == item:
-                self.gvViewer.setText(
-                    self.game.spriteByID(id).getDesc())
-                QTimer.singleShot(5000,lambda:self.msger.setText(""))        
+    #     for id,g in self.gv.sprites.iteritems():
+    #         if g == item:
+    #             self.gvViewer.setText(
+    #                 self.game.spriteByID(id).getDesc())
+    #             QTimer.singleShot(5000,lambda:self.msger.setText(""))        
 
 def main():
     run(M)

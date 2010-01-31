@@ -1,13 +1,8 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/07 03:14:40>
-# last-update-time: <halida 11/13/2009 07:21:14>
-# ---------------------------------
-# 
-
-from qtlib import *
-
+"""
+game enginee
+"""
 from items import *
 from keymap import *
 from viewlib import *
@@ -55,17 +50,26 @@ DIRECT_TO_EVENT = {
 
 class Game(QObject):
     ACTIVE_RANGE = 20
-    def __init__(self):
+    def __init__(self, ui=None):
         super(Game,self).__init__()
-        self.uiwrapper = None
-        self.userCmd = None
         self.map = None
-
         self.pc = pc.PC()
         self.sprites = []
+        self.events = []
+
+        #need to be configed later..
+        self.setUi(None)
+        self.setUserCmd(None)
+
+    def setUi(self, ui):
+        self.ui = ui
+
+    def setUserCmd(self, userCmd):
+        self.userCmd = userCmd
 
     def loadModule(self,module):
         module.setGame(self)
+        self.addEvent(MAPCHANGED)
 
     def getSpriteByPos(self,x,y):
         for s in self.sprites:
@@ -105,33 +109,36 @@ class Game(QObject):
 
         #event
         self.msg("move to level:%d"%self.currentLevel)
-        emit(self,MAPCHANGED)
+        self.addEvent(MAPCHANGED)
 
     def msg(self,m):
-        emit(self,ONMESSAGE,m)
+        self.addEvent(ONMESSAGE,m)
         
     def step(self):
-        #print "stepping.."
-        
+        """
+        game logic update here!
+        """
+        self.events = []
         #phase user command
         if self.userCmd: self.userCmd()
 
         #moving
-        sprites = filter(lambda s:
-                             isinstance(s,sprite.LivingSprite),
-                         self.sprites)
-        sprites = filter(self.nearPC,sprites)
-        for s in sprites:
+        for s in self.sprites:
+            if not isinstance(s,sprite.LivingSprite): continue
+            if not self.nearPC(s): continue
             if s.moving: s.moving(self)
-        sprites = filter(lambda s:s.toLoc!=None,
-                         sprites)
+            if s.toLoc!=None:
+            #caution: if s die, s still can act.
+                self.checkSpriteMoving(s)
 
-        #caution: if s die, s still can act.
-        for s in sprites:
-            self.checkSpriteMoving(s)
-
-        emit(self,STEPED)
+        self.addEvent(STEPED)
+        self.processEvent()
         #print "stepped"
+
+    def processEvent(self):
+        for event in self.events:
+            print event
+            emit(self, *event)
 
     def checkSpriteMoving(self,s):
         #check map collide
@@ -158,8 +165,7 @@ class Game(QObject):
             s.moveTo(*s.toLoc)
             movingEvent = DIRECT_TO_EVENT[direct]
             s.toLoc = None
-            emit(self,UPDATED,
-                 movingEvent,id(s))
+            self.addEvent(UPDATED, movingEvent, id(s))
             if s==self.pc: self.checkGroud()
 
         #when collide to sprite, attack
@@ -173,7 +179,7 @@ class Game(QObject):
         sprites = self.collideToSprite(self.pc.getPos())
         for s in sprites:
             if s!=self.pc:
-                emit(self,ONMESSAGE,s.getDesc())
+                self.addEvent(ONMESSAGE,s.getDesc())
 
     def nearPC(self,s):
         return ((abs(self.pc.px - s.px) < self.ACTIVE_RANGE) and
@@ -185,7 +191,7 @@ class Game(QObject):
                       self.sprites,)
 
     def atk(self,s,d):
-        emit(self,UPDATED,SPRITE_ATK,id(s))
+        self.addEvent(UPDATED,SPRITE_ATK,id(s))
         #check if hit
         if randint(1,20) > s.hit - d.ac:
             self.msg('%s not hit torget.'%s.name)
@@ -205,8 +211,11 @@ class Game(QObject):
                 self.step = None#end game
             else:
                 self.sprites.remove(d)
-                emit(self,UPDATED,SPRITE_DIE,id(d))
+                self.addEvent(UPDATED,SPRITE_DIE,id(d))
 
     def spriteByID(self,ID):
         for s in self.sprites:
             if id(s) == ID: return s
+
+    def addEvent(self,*args):
+        self.events.append(args)

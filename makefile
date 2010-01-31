@@ -1,5 +1,5 @@
 run:
-	python main.py
+	python main.py -d
 
 clean:
 	rm *~ -f

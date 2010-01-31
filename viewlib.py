@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 #-*- coding:utf-8 -*-
-# ---------------------------------
-# create-time:      <2009/11/08 07:21:56>
-# last-update-time: <halida 11/12/2009 20:58:57>
-# ---------------------------------
-# define the qt viewer params
+"""
+define the qt viewer params
+"""
 
-REAL_TIME = True
+REAL_TIME = False
 
 P_SIZE = 32
 
